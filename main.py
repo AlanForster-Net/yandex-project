@@ -24,6 +24,9 @@ class Player(arcade.Sprite):
     def update(self, delta_time):
         self.center_x += self.change_x
 
+    def jump(self):
+        pass
+
 
 class Game(arcade.Window):
     def __init__(self):
