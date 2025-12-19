@@ -1,15 +1,18 @@
 import arcade
+from arcade.experimental.query_demo import SCREEN_HEIGHT, SCREEN_WIDTH
 
 # Constants
-
+SCREEN_HEIGHT = 1980
+SCREEN_WIDTH = 1080
 
 # Classes
 class Level:
   pass
 
 
-class Player:
-  pass
+class Player(arcade.Sprite):
+    def __init__(self, x, y, scale=0.1):
+        super().__init__(x, y)
 
 
 class Game(arcade.Window):
