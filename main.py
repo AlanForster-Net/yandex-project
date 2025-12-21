@@ -12,10 +12,6 @@ GRAVITY = 1.0
 MAX_LEVEL = 10
 
 # Classes
-class Level:
-    pass
-
-
 class Player(arcade.Sprite):
     def __init__(self, x, y, scale=1.0):
         super().__init__('заглушка.jpeg', scale=scale)
@@ -27,6 +23,7 @@ class Player(arcade.Sprite):
 
     def update(self, delta_time):
         self.center_x += self.change_x
+        super().update()
 
     def jump(self):
         pass
@@ -55,16 +52,8 @@ class Game(arcade.Window):
         self.player = Player(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2, 1)
         self.player_list = arcade.SpriteList()
         self.player_list.append(self.player)
-
-    def on_draw(self):
-        self.clear()
-        self.player_list.draw()
         self.bug_count = 0
-        self.init_scene(self.tilemap)
         # Sprites
-        self.player = Player()
-        self.player_list = arcade.SpriteList()
-        self.player_list.append(self.player)
         self.wall_of_death = WallOfDeath()
         self.enemy_list = arcade.SpriteList()
         self.enemy_list.append(self.wall_of_death)
@@ -78,7 +67,10 @@ class Game(arcade.Window):
 
     def on_draw(self):
         self.clear()
+        self.init_scene(self.tilemap)
+        self.clear()
         #? arcade.start_render()
+        self.player_list.draw()
         self.walls.draw()
         self.traps.draw()
         self.end.draw()
@@ -107,20 +99,6 @@ class Game(arcade.Window):
             self.scores_and_results()
             self.write_data_in_database()
             self.next_level()
-
-    def on_key_press(self, key, modifiers):
-        if key in (arcade.key.A, arcade.key.LEFT):
-            pass #? Андрей
-        if key in (arcade.key.D, arcade.key.RIGHT):
-            pass #? Андрей
-        if key == arcade.key.SPACE:
-            # Уточнить и доработать
-            if self.pp_eng.can_jump():
-                pass #? Андрей
-
-    def on_key_release(self, key, modifiers):
-        if key in (arcade.key.A, arcade.key.LEFT, arcade.key.D, arcade.key.RIGHT):
-            pass #? Андрей
 
     def next_level(self):
         if self.n == MAX_LEVEL:
@@ -155,16 +133,11 @@ class Game(arcade.Window):
         elif key == arcade.key.D and self.player.change_x > 0:
             self.player.change_x = 0
 
-def setup_game():
-    win = Game()
-    win.setup()
-    arcade.run()
-
     def write_data_in_database(self):
         pass
 
 def setup_game():
-    win = Game(5)
+    win = Game(1)
     win.setup()
     arcade.run()
 
