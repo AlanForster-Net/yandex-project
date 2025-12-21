@@ -164,7 +164,7 @@ def setup_game():
         pass
 
 def setup_game():
-    win = Game()
+    win = Game(5)
     win.setup()
     arcade.run()
 
