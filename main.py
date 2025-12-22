@@ -5,12 +5,11 @@ from arcade.experimental.query_demo import SCREEN_HEIGHT, SCREEN_WIDTH
 from pyglet.event import EVENT_HANDLE_STATE
 
 # Constants
-SCREEN_HEIGHT = 1024
-SCREEN_WIDTH = 960
+SCREEN_HEIGHT = 1000
+SCREEN_WIDTH = 900
 
 GRAVITY = 1.0
 MAX_LEVEL = 10
-TILE_SCALE = 1.5
 
 # Classes
 class Player(arcade.Sprite):
@@ -28,28 +27,19 @@ class Player(arcade.Sprite):
 
     def jump(self):
         pass
-
-
 #? Андрей
 class WallOfDeath(arcade.Sprite):
     pass
 
 
 class Game(arcade.Window):
-    def __init__(self, n=1, title="game"):
+    def __init__(self, n, title="game"):
         super().__init__(SCREEN_WIDTH, SCREEN_HEIGHT, title=title, fullscreen=True)
-        arcade.set_background_color(arcade.color.PINK)
         self.player = None
         self.player_list = None
         self.background_color = arcade.color.BLACK  # Устанавливаем фон
-        self.tilemap = arcade.load_tilemap(f"tilemaps/tilemap{n}.tmx", scaling=TILE_SCALE)
+        self.tilemap = arcade.load_tilemap(f"tilemaps/tilemap_{n}.tmx")
         self.n = n
-        self.walls = arcade.SpriteList()
-        self.collisions = arcade.SpriteList()
-        self.traps = arcade.SpriteList()
-        self.bugs = arcade.SpriteList()
-        self.end = arcade.SpriteList()
-        self.init_scene(self.tilemap)
 
     def init_scene(self, tilemap):
         self.walls = self.tilemap.sprite_lists["wall"]
@@ -71,7 +61,7 @@ class Game(arcade.Window):
         self.player_camera = arcade.camera.Camera2D()
         self.gui_camera = arcade.camera.Camera2D()
         # Physics engine
-        self.pp_eng = arcade.PhysicsEnginePlatformer(player_sprite=self.player,
+        self.pp_eng = arcade.PhysicsEnginePlatformer(player_sprite=self.player_list[0],
                                                      platforms=self.walls,
                                                      gravity_constant=GRAVITY)
 
@@ -84,18 +74,13 @@ class Game(arcade.Window):
         self.walls.draw()
         self.traps.draw()
         self.end.draw()
-        # Player camera
         self.player_camera.use()
         self.player_list.draw()
-        # GUI camera
         self.gui_camera.use()
         self.gui_draw()
 
     def on_update(self, delta_time=1 / 60):
-        pos = (self.player_list[0].center_x, self.player_list[0].center_y)
-        self.player_camera.position = arcade.math.lerp_2d(self.player_camera.position,
-                                                          pos,
-                                                          0.14)
+        self.pp_eng.update()
         self.player_list.update()
         self.enemy_list.update()
         #? self.traps.update()
@@ -114,7 +99,6 @@ class Game(arcade.Window):
             self.scores_and_results()
             self.write_data_in_database()
             self.next_level()
-        self.pp_eng.update()
 
     def next_level(self):
         if self.n == MAX_LEVEL:
