@@ -13,9 +13,9 @@ SCREEN_WIDTH = 960
 # Player const
 PLAYER_SPEED = 1.5
 JUMP_SPEED = 10
-COYOTE_TIME = 0.08
-JUMP_BUFFER = 0.12
 MAX_JUMPS = 2
+DASH_GAP = 8
+SHIFT_SPEED = 3
 
 # Physic const
 GRAVITY = 0.8
@@ -27,7 +27,7 @@ TILE_SCALE = 2.5
 class Player(arcade.Sprite):
     def __init__(self, x, y, scale=0.1):
         super().__init__('заглушка.jpeg', scale=scale)
-        self.scale = 0.13
+        self.scale = 0.15
         self.center_x = x
         self.center_y = y
         self.change_x = 0
@@ -64,6 +64,8 @@ class Game(arcade.Window):
         self.right_pressed = False
         self.space_pressed = False
         self.space_just_pressed = False
+        self.shift_pressed = False
+        self.dash_button = False
 
     def init_scene(self, tilemap):
         self.walls = self.tilemap.sprite_lists["wall"]
@@ -103,6 +105,8 @@ class Game(arcade.Window):
         self.gui_draw()
 
     def on_update(self, delta_time=1 / 60):
+        # Обновляем физический движок
+        self.pp_eng.update()
         #движение по горизонтале через физ движок
         if self.left_pressed and not self.right_pressed:
             self.player.change_x = -PLAYER_SPEED
@@ -124,9 +128,23 @@ class Game(arcade.Window):
             self.player.jumps_remaining -= 1
             self.space_just_pressed = False
 
-        # Сбрасываем флаг моментального нажатия
+        #Сбрасываю только что нажатый пробел
         if not self.space_pressed:
             self.space_just_pressed = False
+
+        #running
+        if self.shift_pressed and self.right_pressed:
+            self.player.change_x = SHIFT_SPEED
+        elif self.shift_pressed and self.left_pressed:
+            self.player.change_x = -SHIFT_SPEED
+
+        #dash
+        if self.dash_button and self.right_pressed:
+            self.player.change_x = 0
+            self.player.center_x += DASH_GAP
+        elif self.dash_button and self.left_pressed:
+            self.player.change_x = 0
+            self.player.change_x -= DASH_GAP
 
         pos = (self.player.center_x, self.player.center_y)
         self.player_camera.position = arcade.math.lerp_2d(self.player_camera.position,
@@ -134,9 +152,6 @@ class Game(arcade.Window):
                                                           0.14)
         self.player_list.update()
         self.enemy_list.update()
-
-        # Обновляем физический движок
-        self.pp_eng.update()
 
         # Test for "bugs"
         c_bugs = arcade.check_for_collision_with_list(self.player, self.bugs)
@@ -181,6 +196,10 @@ class Game(arcade.Window):
         if key == arcade.key.SPACE:
             self.space_pressed = True
             self.space_just_pressed = True
+        if key == arcade.key.LSHIFT:
+            self.shift_pressed = True
+        if key == arcade.key.Q:
+            self.dash_button = True
 
     def on_key_release(self, key, modifiers):
         if key == arcade.key.A:
@@ -189,6 +208,10 @@ class Game(arcade.Window):
             self.right_pressed = False
         elif key == arcade.key.SPACE:
             self.space_pressed = False
+        elif key == arcade.key.LSHIFT:
+            self.shift_pressed = False
+        elif key == arcade.key.Q:
+            self.dash_button = False
 
     def write_data_in_database(self):
         pass
