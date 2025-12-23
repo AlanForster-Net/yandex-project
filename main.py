@@ -80,12 +80,11 @@ class Game(arcade.Window):
         self.init_scene(self.tilemap)
         self.clear()
         #? arcade.start_render()
-        self.player_list.draw()
+        # Player camera
+        self.player_camera.use()
         self.walls.draw()
         self.traps.draw()
         self.end.draw()
-        # Player camera
-        self.player_camera.use()
         self.player_list.draw()
         # GUI camera
         self.gui_camera.use()
@@ -132,8 +131,6 @@ class Game(arcade.Window):
 
     def scores_and_results(self):
         pass
-    def on_update(self, delta_time):
-        self.player.update(delta_time)
 
     def on_key_press(self, key, modifiers):
         if key == arcade.key.ESCAPE: #использовать Escape, для закрытия игры(заглушка, в будушем будет меню)
@@ -151,6 +148,7 @@ class Game(arcade.Window):
 
     def write_data_in_database(self):
         pass
+
 
 def setup_game():
     win = Game(1)
