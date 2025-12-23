@@ -14,9 +14,9 @@ GRAVITY = 1.0
 MAX_LEVEL = 1
 TILE_SCALE = 2.5
 
-# Classes
+# classes
 class Player(arcade.Sprite):
-    def __init__(self, x, y, scale=1.0):
+    def __init__(self, x, y, scale=0.1):
         super().__init__('заглушка.jpeg', scale=scale)
         self.center_x = x
         self.scale = scale
@@ -24,7 +24,7 @@ class Player(arcade.Sprite):
         self.change_x = 0
         self.change_y = 0
 
-    def update(self, delta_time):
+    def update(self, delta_time=1/60):
         self.center_x += self.change_x
         super().update()
 
