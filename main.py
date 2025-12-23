@@ -14,24 +14,25 @@ GRAVITY = 1.0
 MAX_LEVEL = 1
 TILE_SCALE = 2.5
 
+
 # classes
 class Player(arcade.Sprite):
     def __init__(self, x, y, scale=0.1):
         super().__init__('заглушка.jpeg', scale=scale)
-        self.scale = 0.2
+        self.scale = 0.13
         self.center_x = x
         self.center_y = y
         self.change_x = 0
         self.change_y = 0
 
-    def update(self, delta_time=1/60):
+    def update(self, delta_time=1 / 60):
         super().update()
 
     def jump(self):
         pass
 
 
-#? Андрей
+# ? Андрей
 class WallOfDeath(arcade.Sprite):
     pass
 
@@ -51,6 +52,8 @@ class Game(arcade.Window):
         self.bugs = arcade.SpriteList()
         self.end = arcade.SpriteList()
         self.init_scene(self.tilemap)
+        self.left_pressed = False
+        self.right_pressed = False  # Добавляем флаги для отслеживания нажатий
 
     def init_scene(self, tilemap):
         self.walls = self.tilemap.sprite_lists["wall"]
@@ -74,7 +77,7 @@ class Game(arcade.Window):
         # Physics engine
         self.pp_eng = arcade.PhysicsEnginePlatformer(player_sprite=self.player,
                                                      platforms=self.collisions,
-                                                     gravity_constant=GRAVITY,)
+                                                     gravity_constant=GRAVITY, )
 
     def on_draw(self):
         self.clear()
@@ -90,17 +93,27 @@ class Game(arcade.Window):
         self.gui_draw()
 
     def on_update(self, delta_time=1 / 60):
+        if self.left_pressed and not self.right_pressed:
+            self.player.change_x = -PLAYER_SPEED
+        elif self.right_pressed and not self.left_pressed:
+            self.player.change_x = PLAYER_SPEED
+        elif not self.left_pressed and not self.right_pressed:
+            self.player.change_x = 0
+
         pos = (self.player.center_x, self.player.center_y)
         self.player_camera.position = arcade.math.lerp_2d(self.player_camera.position,
                                                           pos,
                                                           0.14)
         self.player_list.update()
         self.enemy_list.update()
-        #? self.traps.update()
+
+        # Обновляем физический движок
+        self.pp_eng.update()
+
         # Test for "bugs"
         c_bugs = arcade.check_for_collision_with_list(self.player, self.bugs)
         for bug in c_bugs:
-            bug.remove_from_sprite_lists() #? Syntax error ?
+            bug.remove_from_sprite_lists()
             self.bug_count += 1
         # Test for death
         if arcade.check_for_collision(self.player, self.wall_of_death):
@@ -112,7 +125,6 @@ class Game(arcade.Window):
             self.scores_and_results()
             self.write_data_in_database()
             self.next_level()
-        self.pp_eng.update()
 
     def next_level(self):
         if self.n == MAX_LEVEL:
@@ -132,21 +144,22 @@ class Game(arcade.Window):
         pass
 
     def on_key_press(self, key, modifiers):
-        if key == arcade.key.ESCAPE: #использовать Escape, для закрытия игры(заглушка, в будушем будет меню)
+        if key == arcade.key.ESCAPE:  # использовать Escape, для закрытия игры(заглушка, в будушем будет меню)
             arcade.close_window()
         if key == arcade.key.D:
-            self.player.change_x = PLAYER_SPEED #завивсит от динамики игры, надо обсудить будет
+            self.right_pressed = True
         if key == arcade.key.A:
-            self.player.change_x = -PLAYER_SPEED
+            self.left_pressed = True
 
     def on_key_release(self, key, modifiers):
-        if key == arcade.key.A and self.player.change_x < 0:
-            self.player.change_x = 0
-        elif key == arcade.key.D and self.player.change_x > 0:
-            self.player.change_x = 0
+        if key == arcade.key.A:
+            self.left_pressed = False
+        elif key == arcade.key.D:
+            self.right_pressed = False
 
     def write_data_in_database(self):
         pass
+
 
 def setup_game():
     win = Game(1)
