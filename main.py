@@ -18,14 +18,13 @@ TILE_SCALE = 2.5
 class Player(arcade.Sprite):
     def __init__(self, x, y, scale=0.1):
         super().__init__('заглушка.jpeg', scale=scale)
+        self.scale = 0.2
         self.center_x = x
-        self.scale = scale
         self.center_y = y
         self.change_x = 0
         self.change_y = 0
 
     def update(self, delta_time=1/60):
-        self.center_x += self.change_x
         super().update()
 
     def jump(self):
