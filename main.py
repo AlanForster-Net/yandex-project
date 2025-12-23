@@ -1,5 +1,7 @@
 import arcade
 import sqlite3
+
+from arcade.examples.camera_platform import JUMP_SPEED
 from pyglet.graphics import Batch
 from arcade.experimental.query_demo import SCREEN_HEIGHT, SCREEN_WIDTH
 from pyglet.event import EVENT_HANDLE_STATE
@@ -7,10 +9,16 @@ from pyglet.event import EVENT_HANDLE_STATE
 # Constants
 SCREEN_HEIGHT = 1024
 SCREEN_WIDTH = 960
-# Андрею: подумай над скоростью, а то в тесте это молния маквин получается
-# И поработай с прыжком
-PLAYER_SPEED = 2.5
-GRAVITY = 1.0
+
+# Player const
+PLAYER_SPEED = 1.5
+JUMP_SPEED = 10
+COYOTE_TIME = 0.08
+JUMP_BUFFER = 0.12
+MAX_JUMPS = 2
+
+# Physic const
+GRAVITY = 0.8
 MAX_LEVEL = 1
 TILE_SCALE = 2.5
 
@@ -24,13 +32,13 @@ class Player(arcade.Sprite):
         self.center_y = y
         self.change_x = 0
         self.change_y = 0
+        self.jumps_remaining = MAX_JUMPS
+        self.max_jumps = MAX_JUMPS
+        self.double_jump = False
+        self.was_on_ground = False
 
     def update(self, delta_time=1 / 60):
         super().update()
-
-    def jump(self):
-        pass
-
 
 # ? Андрей
 class WallOfDeath(arcade.Sprite):
@@ -53,7 +61,9 @@ class Game(arcade.Window):
         self.end = arcade.SpriteList()
         self.init_scene(self.tilemap)
         self.left_pressed = False
-        self.right_pressed = False  # Добавляем флаги для отслеживания нажатий
+        self.right_pressed = False
+        self.space_pressed = False
+        self.space_just_pressed = False
 
     def init_scene(self, tilemap):
         self.walls = self.tilemap.sprite_lists["wall"]
@@ -93,12 +103,30 @@ class Game(arcade.Window):
         self.gui_draw()
 
     def on_update(self, delta_time=1 / 60):
+        #движение по горизонтале через физ движок
         if self.left_pressed and not self.right_pressed:
             self.player.change_x = -PLAYER_SPEED
         elif self.right_pressed and not self.left_pressed:
             self.player.change_x = PLAYER_SPEED
         elif not self.left_pressed and not self.right_pressed:
             self.player.change_x = 0
+        #прыжок
+        is_on_ground = self.pp_eng.can_jump()
+        if is_on_ground:
+            if not self.player.was_on_ground:
+                self.player.jumps_remaining = self.player.max_jumps
+                self.player.was_on_ground = True
+        else:
+            self.player.was_on_ground = False
+
+        if self.space_just_pressed and self.player.jumps_remaining > 0:
+            self.player.change_y = JUMP_SPEED
+            self.player.jumps_remaining -= 1
+            self.space_just_pressed = False
+
+        # Сбрасываем флаг моментального нажатия
+        if not self.space_pressed:
+            self.space_just_pressed = False
 
         pos = (self.player.center_x, self.player.center_y)
         self.player_camera.position = arcade.math.lerp_2d(self.player_camera.position,
@@ -150,12 +178,17 @@ class Game(arcade.Window):
             self.right_pressed = True
         if key == arcade.key.A:
             self.left_pressed = True
+        if key == arcade.key.SPACE:
+            self.space_pressed = True
+            self.space_just_pressed = True
 
     def on_key_release(self, key, modifiers):
         if key == arcade.key.A:
             self.left_pressed = False
         elif key == arcade.key.D:
             self.right_pressed = False
+        elif key == arcade.key.SPACE:
+            self.space_pressed = False
 
     def write_data_in_database(self):
         pass
