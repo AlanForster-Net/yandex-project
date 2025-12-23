@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="64" height="60" tilewidth="16" tileheight="16" infinite="0" nextlayerid="6" nextobjectid="1">
+ <tileset firstgid="1" source="../tileset1.tsx"/>
+ <layer id="2" name="collision" width="64" height="60">
+  <data encoding="base64" compression="zlib">
+   eJzt2LENACEMBEFaov/myAn4BHHwnpEsQntTWgMAAAAAAAAAAOBF3ZSlX7/+uvTr11+Xfv3667qlP3XDLf0p6f559+lb0v1pqf6vnadu2vl/tHr/Pvrf7R/wwjaO
+  </data>
+ </layer>
+ <layer id="1" name="wall" width="64" height="60">
+  <data encoding="base64" compression="zlib">
+   eJzt0rENgDAMRUEXMA77r0dDRZMCKT/Bd5KV0npyqgAAAAAAAAAAANjRadrSr19/X/r16+9Lv379fa3Sf4T2rtKfku5/3332P0j3p6X6R3ee9Q+uZ9fXqcH799G/b/8NpZAFAQ==
+  </data>
+ </layer>
+ <layer id="3" name="trap" width="64" height="60">
+  <data encoding="base64" compression="zlib">
+   eJztw0EJAAAIBLALYv+cNri3yAZLAAAAAAAAAAAAAAAAAADglymvW8LAAMU=
+  </data>
+ </layer>
+ <layer id="4" name="bug" width="64" height="60">
+  <data encoding="base64" compression="zlib">
+   eJzt0UENADAMAsD6mn9fc7D9aNrcGQBCFQAAAAAAAAAAAAAAAAA/p7sAEdN/fvVPbOvOhy0u/XMBYw==
+  </data>
+ </layer>
+ <layer id="5" name="end" width="64" height="60">
+  <data encoding="base64" compression="zlib">
+   eJztz7ENAAAIw7Dy/9M80J0BW8oBSQAAAAAAAAAAAAAAAABuTekT//79//2HZgG6kAAa
+  </data>
+ </layer>
+</map>
