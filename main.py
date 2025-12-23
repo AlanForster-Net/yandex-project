@@ -5,11 +5,14 @@ from arcade.experimental.query_demo import SCREEN_HEIGHT, SCREEN_WIDTH
 from pyglet.event import EVENT_HANDLE_STATE
 
 # Constants
-SCREEN_HEIGHT = 1000
-SCREEN_WIDTH = 900
-
+SCREEN_HEIGHT = 1024
+SCREEN_WIDTH = 960
+# Андрею: подумай над скоростью, а то в тесте это молния маквин получается
+# И поработай с прыжком
+PLAYER_SPEED = 2.5
 GRAVITY = 1.0
-MAX_LEVEL = 10
+MAX_LEVEL = 1
+TILE_SCALE = 2.5
 
 # Classes
 class Player(arcade.Sprite):
@@ -27,19 +30,28 @@ class Player(arcade.Sprite):
 
     def jump(self):
         pass
+
+
 #? Андрей
 class WallOfDeath(arcade.Sprite):
     pass
 
 
 class Game(arcade.Window):
-    def __init__(self, n, title="game"):
+    def __init__(self, n=1, title="game"):
         super().__init__(SCREEN_WIDTH, SCREEN_HEIGHT, title=title, fullscreen=True)
+        arcade.set_background_color(arcade.color.PINK)
         self.player = None
         self.player_list = None
         self.background_color = arcade.color.BLACK  # Устанавливаем фон
-        self.tilemap = arcade.load_tilemap(f"tilemaps/tilemap_{n}.tmx")
+        self.tilemap = arcade.load_tilemap(f"tilemaps/tilemap{n}.tmx", scaling=TILE_SCALE)
         self.n = n
+        self.walls = arcade.SpriteList()
+        self.collisions = arcade.SpriteList()
+        self.traps = arcade.SpriteList()
+        self.bugs = arcade.SpriteList()
+        self.end = arcade.SpriteList()
+        self.init_scene(self.tilemap)
 
     def init_scene(self, tilemap):
         self.walls = self.tilemap.sprite_lists["wall"]
@@ -49,7 +61,7 @@ class Game(arcade.Window):
         self.end = self.tilemap.sprite_lists["end"]
 
     def setup(self):
-        self.player = Player(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2, 1)
+        self.player = Player(100, 100 // 2, 0.5)
         self.player_list = arcade.SpriteList()
         self.player_list.append(self.player)
         self.bug_count = 0
@@ -61,26 +73,29 @@ class Game(arcade.Window):
         self.player_camera = arcade.camera.Camera2D()
         self.gui_camera = arcade.camera.Camera2D()
         # Physics engine
-        self.pp_eng = arcade.PhysicsEnginePlatformer(player_sprite=self.player_list[0],
-                                                     platforms=self.walls,
-                                                     gravity_constant=GRAVITY)
+        self.pp_eng = arcade.PhysicsEnginePlatformer(player_sprite=self.player,
+                                                     platforms=self.collisions,
+                                                     gravity_constant=GRAVITY,)
 
     def on_draw(self):
         self.clear()
         self.init_scene(self.tilemap)
         self.clear()
-        #? arcade.start_render()
-        self.player_list.draw()
+        # Player camera
+        self.player_camera.use()
         self.walls.draw()
         self.traps.draw()
         self.end.draw()
-        self.player_camera.use()
         self.player_list.draw()
+        # GUI camera
         self.gui_camera.use()
         self.gui_draw()
 
     def on_update(self, delta_time=1 / 60):
-        self.pp_eng.update()
+        pos = (self.player.center_x, self.player.center_y)
+        self.player_camera.position = arcade.math.lerp_2d(self.player_camera.position,
+                                                          pos,
+                                                          0.14)
         self.player_list.update()
         self.enemy_list.update()
         #? self.traps.update()
@@ -99,6 +114,7 @@ class Game(arcade.Window):
             self.scores_and_results()
             self.write_data_in_database()
             self.next_level()
+        self.pp_eng.update()
 
     def next_level(self):
         if self.n == MAX_LEVEL:
@@ -116,16 +132,14 @@ class Game(arcade.Window):
 
     def scores_and_results(self):
         pass
-    def on_update(self, delta_time):
-        self.player.update(delta_time)
 
     def on_key_press(self, key, modifiers):
         if key == arcade.key.ESCAPE: #использовать Escape, для закрытия игры(заглушка, в будушем будет меню)
             arcade.close_window()
         if key == arcade.key.D:
-            self.player.change_x = 10 #завивсит от динамики игры, надо обсудить будет
+            self.player.change_x = PLAYER_SPEED #завивсит от динамики игры, надо обсудить будет
         if key == arcade.key.A:
-            self.player.change_x = -10
+            self.player.change_x = -PLAYER_SPEED
 
     def on_key_release(self, key, modifiers):
         if key == arcade.key.A and self.player.change_x < 0:
