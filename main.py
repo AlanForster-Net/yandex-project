@@ -16,6 +16,8 @@ JUMP_SPEED = 10
 MAX_JUMPS = 2
 DASH_GAP = 8
 SHIFT_SPEED = 3
+SPEED_OF_USING_STAMINA = 0.12
+STAMINA_REFRESH_SPEED = 0.25
 
 # Physic const
 GRAVITY = 0.8
@@ -36,6 +38,9 @@ class Player(arcade.Sprite):
         self.max_jumps = MAX_JUMPS
         self.double_jump = False
         self.was_on_ground = False
+        self.stamina = 3.0
+        self.stamina_refresh_speed = STAMINA_REFRESH_SPEED
+        self.stamina_using_speed = SPEED_OF_USING_STAMINA
 
     def update(self, delta_time=1 / 60):
         super().update()
@@ -66,6 +71,7 @@ class Game(arcade.Window):
         self.space_just_pressed = False
         self.shift_pressed = False
         self.dash_button = False
+        self.timer_running = 0
 
     def init_scene(self, tilemap):
         self.walls = self.tilemap.sprite_lists["wall"]
@@ -105,8 +111,12 @@ class Game(arcade.Window):
         self.gui_draw()
 
     def on_update(self, delta_time=1 / 60):
-        # Обновляем физический движок
         self.pp_eng.update()
+        self.timer_running += delta_time
+        if self.player.stamina < 3.0:
+            self.player.stamina += self.player.stamina_refresh_speed * delta_time
+            if self.player.stamina > 3.0:
+                self.player.stamina = 3.0
         #движение по горизонтале через физ движок
         if self.left_pressed and not self.right_pressed:
             self.player.change_x = -PLAYER_SPEED
@@ -126,6 +136,7 @@ class Game(arcade.Window):
         if self.space_just_pressed and self.player.jumps_remaining > 0:
             self.player.change_y = JUMP_SPEED
             self.player.jumps_remaining -= 1
+            self.player.stamina -= 1
             self.space_just_pressed = False
 
         #Сбрасываю только что нажатый пробел
@@ -135,16 +146,20 @@ class Game(arcade.Window):
         #running
         if self.shift_pressed and self.right_pressed:
             self.player.change_x = SHIFT_SPEED
+            self.player.stamina -= self.player.stamina_using_speed * delta_time
         elif self.shift_pressed and self.left_pressed:
+            self.player.stamina -= self.player.stamina_using_speed * delta_time
             self.player.change_x = -SHIFT_SPEED
 
         #dash
-        if self.dash_button and self.right_pressed:
+        if self.dash_button and self.right_pressed and self.player.stamina > 0: #пока заглушка, потом стамина будет
+            self.player.stamina -= 1
             self.player.change_x = 0
             self.player.center_x += DASH_GAP
-        elif self.dash_button and self.left_pressed:
+        elif self.dash_button and self.left_pressed and self.player.stamina > 0:
+            self.player.stamina -= 1
             self.player.change_x = 0
-            self.player.change_x -= DASH_GAP
+            self.player.center_x -= DASH_GAP
 
         pos = (self.player.center_x, self.player.center_y)
         self.player_camera.position = arcade.math.lerp_2d(self.player_camera.position,
