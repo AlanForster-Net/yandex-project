@@ -79,13 +79,12 @@ class Game(arcade.Window):
 
     def on_draw(self):
         self.clear()
-        self.init_scene(self.tilemap)
-        self.clear()
         # Player camera
         self.player_camera.use()
         self.walls.draw()
         self.traps.draw()
         self.end.draw()
+        self.bugs.draw()
         self.player_list.draw()
         # GUI camera
         self.gui_camera.use()
