@@ -75,6 +75,7 @@ class Game(arcade.Window):
         self.shift_pressed = False
         self.dash_button = False
         self.timer_running = 0
+        self.main_theme = arcade.load_sound("2. Kairi The Maid - Basement.mp3")
 
     def init_scene(self, tilemap):
         self.walls = self.tilemap.sprite_lists["wall"]
