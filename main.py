@@ -29,8 +29,8 @@ TILE_SCALE = 2.5
 # classes
 class Player(arcade.Sprite):
     def __init__(self, x, y, scale=0.1):
-        super().__init__('заглушка.jpeg', scale=scale)
-        self.scale = 0.15
+        super().__init__('Заглушка2.jpeg', scale=scale)
+        self.scale = 0.05
         self.center_x = x
         self.center_y = y
         self.change_x = 0
@@ -100,6 +100,8 @@ class Game(arcade.Window):
                                                      platforms=self.collisions,
                                                      gravity_constant=GRAVITY, )
         arcade.schedule(self.update_timer, 1.0)
+        # Setup of databases
+        self.setup_players_database()
 
     def on_draw(self):
         self.clear()
@@ -135,7 +137,6 @@ class Game(arcade.Window):
         if self.space_just_pressed and self.player.jumps_remaining > 0 and self.player.stamina >= 1:
             self.player.change_y = JUMP_SPEED
             self.player.jumps_remaining -= 1
-            self.player.stamina -= self.player.stamina_using_value
             self.space_just_pressed = False
 
         if not self.space_pressed:
@@ -157,6 +158,7 @@ class Game(arcade.Window):
         elif self.shift_pressed and self.left_pressed:
             self.player.change_x = -PLAYER_SPEED
 
+        # Dash
         if self.dash_button and self.right_pressed and self.player.stamina >= 1:
             self.player.stamina -= self.player.stamina_using_value
             self.player.change_x = 0
@@ -190,6 +192,7 @@ class Game(arcade.Window):
             self.scores_and_results()
             self.write_data_in_database()
             self.next_level()
+
         self.pp_eng.update()
 
     def update_timer(self, delta_time):
@@ -242,6 +245,39 @@ class Game(arcade.Window):
             self.shift_pressed = False
         elif key == arcade.key.Q:
             self.dash_button = False
+
+    def setup_players_database(self):
+        con = sqlite3.connect("database_for_stats.sqlite")
+        cur = con.cursor()
+
+        cur.execute("""CREATE TABLE IF NOT EXISTS players_infromation(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        speed INTEGER,
+        speed_of_jump INTEGER,
+        max_jumps INTEGER,
+        dash_gap INTEGER,
+        shift_speed INTEGER,
+        speed_of_using_stamina INTEGER,
+        stamina_refresh_speed INTEGER,
+        stamina_using_value INTEGER
+        )""")
+
+        con.commit()
+
+        cur.execute(
+            """INSERT INTO players_infromation(speed, speed_of_jump, max_jumps, dash_gap, shift_speed,
+             speed_of_using_stamina, stamina_refresh_speed, stamina_using_value) VALUES(?, ?, ?, ?, ?, ?, ?, ?)""", (
+                PLAYER_SPEED,
+                JUMP_SPEED,
+                MAX_JUMPS,
+                DASH_GAP,
+                SHIFT_SPEED,
+                SPEED_OF_USING_STAMINA,
+                STAMINA_REFRESH_SPEED,
+                STAMINA_USING_VALUE
+            ))
+        con.commit()
+        con.close()
 
     def write_data_in_database(self):
         pass

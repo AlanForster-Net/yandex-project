@@ -4,7 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="9fb9a562-d82a-46ae-8c36-1b49be3ab23f" name="Changes" comment="double jump, running and not working dash">
+    <list default="true" id="9fb9a562-d82a-46ae-8c36-1b49be3ab23f" name="Changes" comment="working stamina">
+      <change afterPath="$PROJECT_DIR$/database_for_stats.sqlite" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Заглушка2.jpeg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -104,7 +107,15 @@
       <option name="project" value="LOCAL" />
       <updated>1766510059661</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="working stamina">
+      <option name="closed" value="true" />
+      <created>1766595080591</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1766595080591</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -136,6 +147,7 @@
     <MESSAGE value="normal moving" />
     <MESSAGE value="very nice maboy" />
     <MESSAGE value="double jump" />
-    <option name="LAST_COMMIT_MESSAGE" value="double jump" />
+    <MESSAGE value="working stamina" />
+    <option name="LAST_COMMIT_MESSAGE" value="working stamina" />
   </component>
 </project>
