@@ -14,10 +14,11 @@ SCREEN_WIDTH = 960
 PLAYER_SPEED = 1.5
 JUMP_SPEED = 10
 MAX_JUMPS = 2
-DASH_GAP = 8
+DASH_GAP = 60
 SHIFT_SPEED = 3
 SPEED_OF_USING_STAMINA = 0.12
-STAMINA_REFRESH_SPEED = 0.25
+STAMINA_REFRESH_SPEED = 0.5
+STAMINA_USING_VALUE = 1.0
 
 # Physic const
 GRAVITY = 0.8
@@ -41,9 +42,11 @@ class Player(arcade.Sprite):
         self.stamina = 3.0
         self.stamina_refresh_speed = STAMINA_REFRESH_SPEED
         self.stamina_using_speed = SPEED_OF_USING_STAMINA
+        self.stamina_using_value = STAMINA_USING_VALUE
 
     def update(self, delta_time=1 / 60):
         super().update()
+
 
 # ? Андрей
 class WallOfDeath(arcade.Sprite):
@@ -96,6 +99,7 @@ class Game(arcade.Window):
         self.pp_eng = arcade.PhysicsEnginePlatformer(player_sprite=self.player,
                                                      platforms=self.collisions,
                                                      gravity_constant=GRAVITY, )
+        arcade.schedule(self.update_timer, 1.0)
 
     def on_draw(self):
         self.clear()
@@ -111,20 +115,15 @@ class Game(arcade.Window):
         self.gui_draw()
 
     def on_update(self, delta_time=1 / 60):
-        self.pp_eng.update()
-        self.timer_running += delta_time
-        if self.player.stamina < 3.0:
-            self.player.stamina += self.player.stamina_refresh_speed * delta_time
-            if self.player.stamina > 3.0:
-                self.player.stamina = 3.0
-        #движение по горизонтале через физ движок
+        # движение по горизонтале через физ движок
         if self.left_pressed and not self.right_pressed:
             self.player.change_x = -PLAYER_SPEED
         elif self.right_pressed and not self.left_pressed:
             self.player.change_x = PLAYER_SPEED
         elif not self.left_pressed and not self.right_pressed:
             self.player.change_x = 0
-        #прыжок
+
+        # прыжок
         is_on_ground = self.pp_eng.can_jump()
         if is_on_ground:
             if not self.player.was_on_ground:
@@ -133,33 +132,41 @@ class Game(arcade.Window):
         else:
             self.player.was_on_ground = False
 
-        if self.space_just_pressed and self.player.jumps_remaining > 0:
+        if self.space_just_pressed and self.player.jumps_remaining > 0 and self.player.stamina >= 1:
             self.player.change_y = JUMP_SPEED
             self.player.jumps_remaining -= 1
-            self.player.stamina -= 1
+            self.player.stamina -= self.player.stamina_using_value
             self.space_just_pressed = False
 
-        #Сбрасываю только что нажатый пробел
         if not self.space_pressed:
             self.space_just_pressed = False
 
-        #running
-        if self.shift_pressed and self.right_pressed:
+        # running (только если есть стамина)
+        if self.shift_pressed and self.right_pressed and self.player.stamina > 0:
             self.player.change_x = SHIFT_SPEED
             self.player.stamina -= self.player.stamina_using_speed * delta_time
-        elif self.shift_pressed and self.left_pressed:
+            if self.player.stamina < 0:
+                self.player.stamina = 0
+        elif self.shift_pressed and self.left_pressed and self.player.stamina > 0:
             self.player.stamina -= self.player.stamina_using_speed * delta_time
             self.player.change_x = -SHIFT_SPEED
+            if self.player.stamina < 0:
+                self.player.stamina = 0
+        elif self.shift_pressed and self.right_pressed:
+            self.player.change_x = PLAYER_SPEED
+        elif self.shift_pressed and self.left_pressed:
+            self.player.change_x = -PLAYER_SPEED
 
-        #dash
-        if self.dash_button and self.right_pressed and self.player.stamina > 0: #пока заглушка, потом стамина будет
-            self.player.stamina -= 1
+        if self.dash_button and self.right_pressed and self.player.stamina >= 1:
+            self.player.stamina -= self.player.stamina_using_value
             self.player.change_x = 0
             self.player.center_x += DASH_GAP
-        elif self.dash_button and self.left_pressed and self.player.stamina > 0:
-            self.player.stamina -= 1
+            self.dash_button = False
+        elif self.dash_button and self.left_pressed and self.player.stamina >= 1:
+            self.player.stamina -= self.player.stamina_using_value
             self.player.change_x = 0
             self.player.center_x -= DASH_GAP
+            self.dash_button = False
 
         pos = (self.player.center_x, self.player.center_y)
         self.player_camera.position = arcade.math.lerp_2d(self.player_camera.position,
@@ -183,6 +190,14 @@ class Game(arcade.Window):
             self.scores_and_results()
             self.write_data_in_database()
             self.next_level()
+        self.pp_eng.update()
+
+    def update_timer(self, delta_time):
+        self.timer_running += 1
+        if self.player.stamina < 3.0:
+            self.player.stamina += self.player.stamina_refresh_speed
+            if self.player.stamina > 3.0:
+                self.player.stamina = 3.0
 
     def next_level(self):
         if self.n == MAX_LEVEL:
