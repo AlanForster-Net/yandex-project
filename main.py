@@ -75,7 +75,8 @@ class Game(arcade.Window):
         self.shift_pressed = False
         self.dash_button = False
         self.timer_running = 0
-        self.main_theme = arcade.load_sound("2. Kairi The Maid - Basement.mp3")
+        self.main_theme = arcade.load_sound("soundtrack.mp3")
+        self.music_player = None
 
     def init_scene(self, tilemap):
         self.walls = self.tilemap.sprite_lists["wall"]
@@ -85,6 +86,7 @@ class Game(arcade.Window):
         self.end = self.tilemap.sprite_lists["end"]
 
     def setup(self):
+        self.music_player = self.main_theme.play(volume=0.3, loop=True)
         self.player = Player(100, 100 // 2, 0.5)
         self.player_list = arcade.SpriteList()
         self.player_list.append(self.player)
@@ -103,6 +105,7 @@ class Game(arcade.Window):
         arcade.schedule(self.update_timer, 1.0)
         # Setup of databases
         self.setup_players_database()
+
 
     def on_draw(self):
         self.clear()
