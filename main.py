@@ -29,8 +29,9 @@ TILE_SCALE = 2.5
 # classes
 class Player(arcade.Sprite):
     def __init__(self, x, y, scale=0.1):
-        super().__init__('Заглушка2.jpeg', scale=scale)
-        self.scale = 0.05
+        # Базовые настройки
+        super().__init__('players_frames/idle.png', scale=scale)
+        self.scale = 2.5
         self.center_x = x
         self.center_y = y
         self.change_x = 0
@@ -43,10 +44,57 @@ class Player(arcade.Sprite):
         self.stamina_refresh_speed = STAMINA_REFRESH_SPEED
         self.stamina_using_speed = SPEED_OF_USING_STAMINA
         self.stamina_using_value = STAMINA_USING_VALUE
+        self.frames = dict()
+        # Анимационные переменные
+        self.current_frame = 0
+        self.animation_speed = 0.0
+        self.animation_timer = 0
+        # Текстуры
+        self.frames["running_right"] = list()
+        self.frames["running_left"] = list()
+        self.frames["running_jump"] = list()
+        self.frames["die"] = arcade.load_texture("players_frames/die.png")
+        self.frames["idle"] = arcade.load_texture("players_frames/idle.png")
+        self.frames["jump"] = arcade.load_texture("players_frames/jump_1.png")
+        for i in range(1, 5):
+            self.frames["running_right"].append(arcade.load_texture(f"players_frames/run_r_{i}.png"))
+
+        for i in range(1, 5):
+            self.frames["running_left"].append(arcade.load_texture(f"players_frames/run_l_{i}.png"))
 
     def update(self, delta_time=1 / 60):
         super().update()
+        # Определение состояния героя
+        self.animation_timer += delta_time
+        if abs(self.change_x) == PLAYER_SPEED:
+            self.animation_speed = 0.2
+            if self.change_x > 0:
+                if self.animation_timer >= self.animation_speed:
+                    self.animation_timer = 0
+                    self.current_frame = (self.current_frame + 1) % 4
+                    self.texture = self.frames["running_right"][self.current_frame]
+            elif self.change_x < 0:
+                if self.animation_timer >= self.animation_speed:
+                    self.animation_timer = 0
+                    self.current_frame = (self.current_frame + 1) % 4
+                    self.texture = self.frames["running_left"][self.current_frame]
+        elif abs(self.change_x) == 2 * PLAYER_SPEED:
+            self.animation_speed = 0.1
+            if self.change_x > 0:
+                if self.animation_timer >= self.animation_speed:
+                    self.animation_timer = 0
+                    self.current_frame = (self.current_frame + 1) % 4
+                    self.texture = self.frames["running_right"][self.current_frame]
 
+            elif self.change_x < 0:
+                if self.animation_timer >= self.animation_speed:
+                    self.animation_timer = 0
+                    self.current_frame = (self.current_frame + 1) % 4
+                    self.texture = self.frames["running_left"][self.current_frame]
+
+        elif abs(self.change_x) == 0:
+            self.texture = self.frames["idle"]
+            self.animation_timer = 0
 
 # ? Андрей
 class WallOfDeath(arcade.Sprite):
@@ -55,7 +103,7 @@ class WallOfDeath(arcade.Sprite):
 
 class Game(arcade.Window):
     def __init__(self, n=1, title="game"):
-        super().__init__(SCREEN_WIDTH, SCREEN_HEIGHT, title=title, fullscreen=True)
+        super().__init__(SCREEN_WIDTH, SCREEN_HEIGHT, title=title, fullscreen=False)
         arcade.set_background_color(arcade.color.PINK)
         self.player = None
         self.player_list = None
@@ -106,7 +154,6 @@ class Game(arcade.Window):
         # Setup of databases
         self.setup_players_database()
 
-
     def on_draw(self):
         self.clear()
         # Player camera
@@ -150,11 +197,13 @@ class Game(arcade.Window):
         if self.shift_pressed and self.right_pressed and self.player.stamina > 0:
             self.player.change_x = SHIFT_SPEED
             self.player.stamina -= self.player.stamina_using_speed * delta_time
+            self.player.running_right = True
             if self.player.stamina < 0:
                 self.player.stamina = 0
         elif self.shift_pressed and self.left_pressed and self.player.stamina > 0:
             self.player.stamina -= self.player.stamina_using_speed * delta_time
             self.player.change_x = -SHIFT_SPEED
+            self.player.running_left = True
             if self.player.stamina < 0:
                 self.player.stamina = 0
         elif self.shift_pressed and self.right_pressed:
@@ -178,9 +227,9 @@ class Game(arcade.Window):
         self.player_camera.position = arcade.math.lerp_2d(self.player_camera.position,
                                                           pos,
                                                           0.14)
-        self.player_list.update()
+        self.pp_eng.update()
         self.enemy_list.update()
-
+        self.player_list.update()
         # Test for "bugs"
         c_bugs = arcade.check_for_collision_with_list(self.player, self.bugs)
         for bug in c_bugs:
@@ -196,8 +245,6 @@ class Game(arcade.Window):
             self.scores_and_results()
             self.write_data_in_database()
             self.next_level()
-
-        self.pp_eng.update()
 
     def update_timer(self, delta_time):
         self.timer_running += 1
