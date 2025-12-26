@@ -218,7 +218,10 @@ class Game(arcade.Window):
         pass
 
     def end_game(self):
-        pass
+        arcade.close_window()
+
+    def win_game(self):
+        arcade.close_window()
 
     def scores_and_results(self):
         pass
