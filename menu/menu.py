@@ -1,7 +1,7 @@
 import arcade
 from arcade.gui import UIManager, UIFlatButton, UITextureButton, UILabel
 from arcade.gui.widgets.layout import UIAnchorLayout, UIBoxLayout
-from main import Game
+from ..game.game import Game
 from screeninfo import get_monitors
 
 
@@ -60,11 +60,3 @@ class gameGUI(arcade.Window):
 
     def on_mouse_press(self, x, y, button, modifiers):
         pass
-
-def setup_gui():
-    win = gameGUI()
-    arcade.run()
-
-
-if __name__ == "__main__":
-    setup_gui()
