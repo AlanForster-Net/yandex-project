@@ -251,37 +251,7 @@ class Game(arcade.Window):
             self.dash_button = False
 
     def setup_players_database(self):
-        con = sqlite3.connect("database_for_stats.sqlite")
-        cur = con.cursor()
-
-        cur.execute("""CREATE TABLE IF NOT EXISTS players_infromation(
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        speed INTEGER,
-        speed_of_jump INTEGER,
-        max_jumps INTEGER,
-        dash_gap INTEGER,
-        shift_speed INTEGER,
-        speed_of_using_stamina INTEGER,
-        stamina_refresh_speed INTEGER,
-        stamina_using_value INTEGER
-        )""")
-
-        con.commit()
-
-        cur.execute(
-            """INSERT INTO players_infromation(speed, speed_of_jump, max_jumps, dash_gap, shift_speed,
-             speed_of_using_stamina, stamina_refresh_speed, stamina_using_value) VALUES(?, ?, ?, ?, ?, ?, ?, ?)""", (
-                PLAYER_SPEED,
-                JUMP_SPEED,
-                MAX_JUMPS,
-                DASH_GAP,
-                SHIFT_SPEED,
-                SPEED_OF_USING_STAMINA,
-                STAMINA_REFRESH_SPEED,
-                STAMINA_USING_VALUE
-            ))
-        con.commit()
-        con.close()
+        pass
 
     def write_data_in_database(self):
         pass
