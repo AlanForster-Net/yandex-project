@@ -32,7 +32,7 @@ TILE_SCALE = 2.5
 # classes
 class Player(arcade.Sprite):
     def __init__(self, x, y, scale=0.1):
-        super().__init__('../resources/img/Заглушка2.jpeg', scale=scale)
+        super().__init__('resources/img/Заглушка2.jpeg', scale=scale)
         self.scale = 0.05
         self.center_x = x
         self.center_y = y
@@ -63,7 +63,7 @@ class Game(arcade.Window):
         self.player = None
         self.player_list = None
         self.background_color = arcade.color.BLACK  # Устанавливаем фон
-        self.tilemap = arcade.load_tilemap(f"../resources/tile/tilemaps/tilemap{n}.tmx", scaling=TILE_SCALE)
+        self.tilemap = arcade.load_tilemap(f"resources/tile/tilemaps/tilemap{n}.tmx", scaling=TILE_SCALE)
         self.n = n
         self.walls = arcade.SpriteList()
         self.collisions = arcade.SpriteList()
@@ -78,7 +78,7 @@ class Game(arcade.Window):
         self.shift_pressed = False
         self.dash_button = False
         self.timer_running = 0
-        self.main_theme = arcade.load_sound("../resources/sound/soundtrack.mp3")
+        self.main_theme = arcade.load_sound("resources/sound/soundtrack.mp3")
         self.music_player = None
 
     def init_scene(self, tilemap):
@@ -214,7 +214,7 @@ class Game(arcade.Window):
             self.win_game()
         else:
             self.n += 1
-            self.tilemap = arcade.load_tilemap(f"../resources/tile/tilemaps/tilemap{self.n}.tmx")
+            self.tilemap = arcade.load_tilemap(f"resources/tile/tilemaps/tilemap{self.n}.tmx")
             self.init_scene(self.tilemap)
 
     def gui_draw(self):

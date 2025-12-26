@@ -1,7 +1,7 @@
 import arcade
 from arcade.gui import UIManager, UIFlatButton, UITextureButton, UILabel
 from arcade.gui.widgets.layout import UIAnchorLayout, UIBoxLayout
-from ..game.game import Game
+from game.game import Game
 from screeninfo import get_monitors
 
 
@@ -32,7 +32,7 @@ class gameGUI(arcade.Window):
         self.box_layout.add(label)
         flat_button = UIFlatButton(text="Плоская Кнопка", width=200, height=50, color=arcade.color.BLUE)
         flat_button.on_click = self.pressBlue
-        texture_normal = arcade.load_texture("заглушка3.png")
+        texture_normal = arcade.load_texture("resources/img/заглушка3.png")
         texture_button = UITextureButton(texture=texture_normal,
                                          texture_hovered=texture_normal,
                                          texture_pressed=texture_normal,

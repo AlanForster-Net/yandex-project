@@ -3,7 +3,7 @@ from menu.menu import gameGUI
 
 
 def run():
-    win = gameGUI()
+    _ = gameGUI()
     arcade.run()
 
 
