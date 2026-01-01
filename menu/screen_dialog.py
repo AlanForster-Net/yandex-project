@@ -5,11 +5,18 @@ from arcade.gui.widgets.layout import UIAnchorLayout, UIBoxLayout
 
 
 TITLE = "Выберите экран для запуска"
+SCREEN_HEIGHT = 200
+SCREEN_WIDTH = 400
 
 
-class Dialog(arcade.View):
+class Dialog(arcade.Window):
+    def get_sc(self):
+        screens = arcade.get_screens()
+        print(screens)
+
+
     def __init__(self):
-        super().__init__(400, 200, title=TITLE, fullscreen=False)
+        super().__init__(SCREEN_WIDTH, SCREEN_HEIGHT, title=TITLE, fullscreen=False)
         arcade.set_background_color(arcade.color.WHITE)
         self.manager = UIManager()
         self.manager.enable()
@@ -18,10 +25,11 @@ class Dialog(arcade.View):
         self.setup_widgets()
         self.anchor_layout.add(self.box_layout)
         self.manager.add(self.anchor_layout)
+        self.get_sc()
 
-    def get_monitors_list(self):
-        monitors = get_screens()
+
 
 
     def setup_widgets(self):
         pass
+

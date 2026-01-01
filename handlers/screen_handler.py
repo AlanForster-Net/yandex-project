@@ -1,9 +1,7 @@
-from handlers.json_handler import reader
-import os
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-PATH = os.path.join(BASE_DIR, "../", "data", "cfg.json")
+import arcade
 
 
+def read_scre
 
 def get_primary_screen():
     data = reader(PATH)
