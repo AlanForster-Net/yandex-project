@@ -29,8 +29,7 @@ TILE_SCALE = 2.5
 # classes
 class Player(arcade.Sprite):
     def __init__(self, x, y, scale=0.1):
-        # Базовые настройки
-        super().__init__('../players_frames/idle.png', scale=scale)
+        super().__init__('players_frames/idle.png', scale=scale)
         self.scale = 2.5
         self.center_x = x
         self.center_y = y
@@ -45,26 +44,23 @@ class Player(arcade.Sprite):
         self.stamina_using_speed = SPEED_OF_USING_STAMINA
         self.stamina_using_value = STAMINA_USING_VALUE
         self.frames = dict()
-        # Анимационные переменные
         self.current_frame = 0
         self.animation_speed = 0.0
         self.animation_timer = 0
-        # Текстуры
         self.frames["running_right"] = list()
         self.frames["running_left"] = list()
         self.frames["running_jump"] = list()
-        self.frames["die"] = arcade.load_texture("../players_frames/die.png")
-        self.frames["idle"] = arcade.load_texture("../players_frames/idle.png")
-        self.frames["jump"] = arcade.load_texture("../players_frames/jump_1.png")
+        self.frames["die"] = arcade.load_texture("players_frames/die.png")
+        self.frames["idle"] = arcade.load_texture("players_frames/idle.png")
+        self.frames["jump"] = arcade.load_texture("players_frames/jump_1.png")
         for i in range(1, 5):
             self.frames["running_right"].append(arcade.load_texture(f"players_frames/run_r_{i}.png"))
 
         for i in range(1, 5):
-            self.frames["running_left"].append(arcade.load_texture(f"players_frames/run_l_{i}.png"))
+            self.frames["running_left"].append(arcade.load_texture(f"players_frames/run_L{i}.png"))
 
     def update(self, delta_time=1 / 60):
         super().update()
-        # Определение состояния героя
         self.animation_timer += delta_time
         if abs(self.change_x) == PLAYER_SPEED:
             self.animation_speed = 0.2
@@ -96,7 +92,6 @@ class Player(arcade.Sprite):
             self.texture = self.frames["idle"]
             self.animation_timer = 0
 
-# ? Андрей
 class WallOfDeath(arcade.Sprite):
     pass
 
@@ -107,8 +102,8 @@ class Game(arcade.Window):
         arcade.set_background_color(arcade.color.PINK)
         self.player = None
         self.player_list = None
-        self.background_color = arcade.color.BLACK  # Устанавливаем фон
-        self.tilemap = arcade.load_tilemap(f"tilemaps/tilemap{n}.tmx", scaling=TILE_SCALE)
+        self.background_color = arcade.color.BLACK
+        self.tilemap = arcade.load_tilemap(f"resources/tile/tilemaps/tilemap{n}.tmx", scaling=TILE_SCALE)
         self.n = n
         self.walls = arcade.SpriteList()
         self.collisions = arcade.SpriteList()
@@ -123,7 +118,7 @@ class Game(arcade.Window):
         self.shift_pressed = False
         self.dash_button = False
         self.timer_running = 0
-        self.main_theme = arcade.load_sound("../soundtrack.mp3")
+        self.main_theme = arcade.load_sound("resources/sound/soundtrack.mp3")
         self.music_player = None
 
     def init_scene(self, tilemap):
@@ -139,36 +134,29 @@ class Game(arcade.Window):
         self.player_list = arcade.SpriteList()
         self.player_list.append(self.player)
         self.bug_count = 0
-        # Sprites
         self.wall_of_death = WallOfDeath()
         self.enemy_list = arcade.SpriteList()
         self.enemy_list.append(self.wall_of_death)
-        # Camera
         self.player_camera = arcade.camera.Camera2D()
         self.gui_camera = arcade.camera.Camera2D()
-        # Physics engine
         self.pp_eng = arcade.PhysicsEnginePlatformer(player_sprite=self.player,
                                                      platforms=self.collisions,
                                                      gravity_constant=GRAVITY, )
         arcade.schedule(self.update_timer, 1.0)
-        # Setup of databases
         self.setup_players_database()
 
     def on_draw(self):
         self.clear()
-        # Player camera
         self.player_camera.use()
         self.walls.draw()
         self.traps.draw()
         self.end.draw()
         self.bugs.draw()
         self.player_list.draw()
-        # GUI camera
         self.gui_camera.use()
         self.gui_draw()
 
     def on_update(self, delta_time=1 / 60):
-        # движение по горизонтале через физ движок
         if self.left_pressed and not self.right_pressed:
             self.player.change_x = -PLAYER_SPEED
         elif self.right_pressed and not self.left_pressed:
@@ -176,7 +164,6 @@ class Game(arcade.Window):
         elif not self.left_pressed and not self.right_pressed:
             self.player.change_x = 0
 
-        # прыжок
         is_on_ground = self.pp_eng.can_jump()
         if is_on_ground:
             if not self.player.was_on_ground:
@@ -193,7 +180,6 @@ class Game(arcade.Window):
         if not self.space_pressed:
             self.space_just_pressed = False
 
-        # running (только если есть стамина)
         if self.shift_pressed and self.right_pressed and self.player.stamina > 0:
             self.player.change_x = SHIFT_SPEED
             self.player.stamina -= self.player.stamina_using_speed * delta_time
@@ -211,7 +197,6 @@ class Game(arcade.Window):
         elif self.shift_pressed and self.left_pressed:
             self.player.change_x = -PLAYER_SPEED
 
-        # Dash
         if self.dash_button and self.right_pressed and self.player.stamina >= 1:
             self.player.stamina -= self.player.stamina_using_value
             self.player.change_x = 0
@@ -230,17 +215,14 @@ class Game(arcade.Window):
         self.pp_eng.update()
         self.enemy_list.update()
         self.player_list.update()
-        # Test for "bugs"
         c_bugs = arcade.check_for_collision_with_list(self.player, self.bugs)
         for bug in c_bugs:
             bug.remove_from_sprite_lists()
             self.bug_count += 1
-        # Test for death
         if arcade.check_for_collision(self.player, self.wall_of_death):
             self.end_game()
         if len(arcade.check_for_collision_with_list(self.player, self.traps)) != 0:
             self.end_game()
-        # Test for success
         if len(arcade.check_for_collision_with_list(self.player, self.end)) != 0:
             self.scores_and_results()
             self.write_data_in_database()
@@ -258,7 +240,7 @@ class Game(arcade.Window):
             self.win_game()
         else:
             self.n += 1
-            self.tilemap = arcade.load_tilemap(f"tilemaps/tilemap{self.n}.tmx")
+            self.tilemap = arcade.load_tilemap(f"resources/tile/tilemaps/tilemap{self.n}.tmx")
             self.init_scene(self.tilemap)
 
     def gui_draw(self):
@@ -271,7 +253,7 @@ class Game(arcade.Window):
         pass
 
     def on_key_press(self, key, modifiers):
-        if key == arcade.key.ESCAPE:  # использовать Escape, для закрытия игры(заглушка, в будушем будет меню)
+        if key == arcade.key.ESCAPE:
             arcade.close_window()
         if key == arcade.key.D:
             self.right_pressed = True
