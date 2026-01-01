@@ -2,6 +2,7 @@ import arcade
 import sqlite3
 
 from arcade.examples.camera_platform import JUMP_SPEED
+from arcade.examples.follow_path import ENEMY_SPEED
 from pyglet.graphics import Batch
 from arcade.experimental.query_demo import SCREEN_HEIGHT, SCREEN_WIDTH
 from pyglet.event import EVENT_HANDLE_STATE
@@ -20,6 +21,8 @@ SPEED_OF_USING_STAMINA = 0.12
 STAMINA_REFRESH_SPEED = 0.5
 STAMINA_USING_VALUE = 1.0
 
+#Enemy const
+ENEMY_SPEED = 0.75
 # Physic const
 GRAVITY = 0.8
 MAX_LEVEL = 1
@@ -28,9 +31,8 @@ TILE_SCALE = 2.5
 
 # classes
 class Player(arcade.Sprite):
-    def __init__(self, x, y, scale=0.1):
+    def __init__(self, x, y, scale=2.5):
         super().__init__('players_frames/idle.png', scale=scale)
-        self.scale = 2.5
         self.center_x = x
         self.center_y = y
         self.change_x = 0
@@ -93,7 +95,12 @@ class Player(arcade.Sprite):
             self.animation_timer = 0
 
 class WallOfDeath(arcade.Sprite):
-    pass
+    def __init__(self,  x, y, scale=1.25):
+        super().__init__('resources/img/заглушка_для_врага.png', scale=scale)
+        self.center_x = x
+        self.center_y = y
+        self.width = self.width // 1.5
+        self.change_x = ENEMY_SPEED
 
 
 class Game(arcade.Window):
@@ -130,11 +137,11 @@ class Game(arcade.Window):
 
     def setup(self):
         self.music_player = self.main_theme.play(volume=0.3, loop=True)
-        self.player = Player(100, 100 // 2, 0.5)
+        self.player = Player(100, 100 // 2)
         self.player_list = arcade.SpriteList()
         self.player_list.append(self.player)
         self.bug_count = 0
-        self.wall_of_death = WallOfDeath()
+        self.wall_of_death = WallOfDeath(100, 230)
         self.enemy_list = arcade.SpriteList()
         self.enemy_list.append(self.wall_of_death)
         self.player_camera = arcade.camera.Camera2D()
@@ -153,10 +160,12 @@ class Game(arcade.Window):
         self.end.draw()
         self.bugs.draw()
         self.player_list.draw()
+        self.enemy_list.draw()
         self.gui_camera.use()
         self.gui_draw()
 
     def on_update(self, delta_time=1 / 60):
+        self.pp_eng.update()
         if self.left_pressed and not self.right_pressed:
             self.player.change_x = -PLAYER_SPEED
         elif self.right_pressed and not self.left_pressed:
@@ -212,7 +221,6 @@ class Game(arcade.Window):
         self.player_camera.position = arcade.math.lerp_2d(self.player_camera.position,
                                                           pos,
                                                           0.14)
-        self.pp_eng.update()
         self.enemy_list.update()
         self.player_list.update()
         c_bugs = arcade.check_for_collision_with_list(self.player, self.bugs)
