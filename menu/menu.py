@@ -13,7 +13,7 @@ SCREEN_WIDTH = MONITOR.width
 
 class gameGUI(arcade.Window):
     def __init__(self):
-        super().__init__(SCREEN_WIDTH, SCREEN_HEIGHT, title=TITLE, fullscreen=True)
+        super().__init__(1000, 1000, title=TITLE, fullscreen=False)
         arcade.set_background_color(arcade.color.GRAY)
         self.manager = UIManager()
         self.manager.enable()
