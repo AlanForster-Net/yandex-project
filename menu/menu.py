@@ -2,18 +2,16 @@ import arcade
 from arcade.gui import UIManager, UIFlatButton, UITextureButton, UILabel
 from arcade.gui.widgets.layout import UIAnchorLayout, UIBoxLayout
 from game.game import Game
-from screeninfo import get_monitors
+from handlers.screen_handler import check_screen, get_screen_data
 
 
 TITLE = "Run from antivirus! — Idle"
-MONITOR = get_monitors()[0]
-SCREEN_HEIGHT = MONITOR.height
-SCREEN_WIDTH = MONITOR.width
 
 
 class gameGUI(arcade.Window):
     def __init__(self):
-        super().__init__(SCREEN_WIDTH, SCREEN_HEIGHT, title=TITLE, fullscreen=True)
+        super().__init__(get_screen_data("screenWidth"), get_screen_data("screenHeight"), title=TITLE,
+                         fullscreen=True, screen=arcade.get_screens()[get_screen_data("screenNum")])
         arcade.set_background_color(arcade.color.GRAY)
         self.manager = UIManager()
         self.manager.enable()
@@ -54,6 +52,7 @@ class gameGUI(arcade.Window):
         pass
 
     def pressBlue(self, junk):
+        check_screen()
         win = Game(1)
         win.setup()
         arcade.run()

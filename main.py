@@ -1,26 +1,12 @@
 import arcade
 from menu.menu import gameGUI
-from handlers.json_handler import reader
-from menu.screen_dialog import Dialog
-
-JSONPATH = 'data/cfg.json'
-
-
-def check_chosen_screen():
-    data = reader(JSONPATH)
-    if "screen" in data.keys():
-        return 0
-    return 1
-
-
-def get_screen():
-    _ = Dialog()
-    arcade.run()
+from handlers.screen_handler import check_screen
+from menu.screen_dialog import run_dialog
 
 
 def run():
-    if check_chosen_screen():
-        get_screen()
+    if check_screen():
+        run_dialog()
     _ = gameGUI()
     arcade.run()
 

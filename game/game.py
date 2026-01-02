@@ -5,13 +5,12 @@ from arcade.examples.camera_platform import JUMP_SPEED
 from pyglet.graphics import Batch
 from arcade.experimental.query_demo import SCREEN_HEIGHT, SCREEN_WIDTH
 from pyglet.event import EVENT_HANDLE_STATE
-from screeninfo import get_monitors
+
 
 # Constants
 TITLE = "Run from antivirus! — Idle"
-MONITOR = get_monitors()[0]
-SCREEN_HEIGHT = MONITOR.height
-SCREEN_WIDTH = MONITOR.width
+SCREEN_HEIGHT = 720
+SCREEN_WIDTH = 1280
 
 # Player const
 PLAYER_SPEED = 1.5
