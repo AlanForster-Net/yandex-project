@@ -21,8 +21,8 @@ SPEED_OF_USING_STAMINA = 0.12
 STAMINA_REFRESH_SPEED = 0.5
 STAMINA_USING_VALUE = 1.0
 
-#Enemy const
-ENEMY_SPEED = 0.75
+# Enemy const
+ENEMY_SPEED = 150
 # Physic const
 GRAVITY = 0.8
 MAX_LEVEL = 1
@@ -31,7 +31,7 @@ TILE_SCALE = 2.5
 
 # classes
 class Player(arcade.Sprite):
-    def __init__(self, x, y, scale=2.5):
+    def __init__(self, x, y, scale=2):
         super().__init__('players_frames/idle.png', scale=scale)
         self.center_x = x
         self.center_y = y
@@ -55,6 +55,7 @@ class Player(arcade.Sprite):
         self.frames["die"] = arcade.load_texture("players_frames/die.png")
         self.frames["idle"] = arcade.load_texture("players_frames/idle.png")
         self.frames["jump"] = arcade.load_texture("players_frames/jump_1.png")
+        self.live = True
         for i in range(1, 5):
             self.frames["running_right"].append(arcade.load_texture(f"players_frames/run_r_{i}.png"))
 
@@ -63,6 +64,9 @@ class Player(arcade.Sprite):
 
     def update(self, delta_time=1 / 60):
         super().update()
+        if not self.live:
+            self.texture = self.frames["die"]
+            return
         self.animation_timer += delta_time
         if abs(self.change_x) == PLAYER_SPEED:
             self.animation_speed = 0.2
@@ -95,13 +99,28 @@ class Player(arcade.Sprite):
             self.animation_timer = 0
 
 class WallOfDeath(arcade.Sprite):
-    def __init__(self,  x, y, scale=1.25):
-        super().__init__('resources/img/заглушка_для_врага.png', scale=scale)
+    def __init__(self, x, y, scale=1.25):
+        super().__init__('resources/img/variant_for_wall.png', scale=scale)
         self.center_x = x
         self.center_y = y
-        self.width = self.width // 1.5
-        self.change_x = ENEMY_SPEED
 
+        self.frames = [arcade.load_texture("resources/img/variant_for_wall.png"),
+                       arcade.load_texture("resources/img/variant_for_wall_2.png")]
+        self.animation_speed = 5.0
+        self.current_frame = 0
+        self.animation_timer = 0
+
+        self.expending_speed = ENEMY_SPEED
+        self.width = self.width // 8
+        self.height *= 2
+
+    def update(self, delta_time):
+        self.width += delta_time * self.expending_speed
+        self.animation_timer += delta_time
+        if self.animation_timer >= self.animation_speed:
+            self.animation_timer = 0
+            self.current_frame = (self.current_frame + 1) % 2
+            self.texture = self.frames[self.current_frame]
 
 class Game(arcade.Window):
     def __init__(self, n=1, title="game"):
@@ -141,7 +160,7 @@ class Game(arcade.Window):
         self.player_list = arcade.SpriteList()
         self.player_list.append(self.player)
         self.bug_count = 0
-        self.wall_of_death = WallOfDeath(100, 230)
+        self.wall_of_death = WallOfDeath(-100, 230)
         self.enemy_list = arcade.SpriteList()
         self.enemy_list.append(self.wall_of_death)
         self.player_camera = arcade.camera.Camera2D()
@@ -165,7 +184,6 @@ class Game(arcade.Window):
         self.gui_draw()
 
     def on_update(self, delta_time=1 / 60):
-        self.pp_eng.update()
         if self.left_pressed and not self.right_pressed:
             self.player.change_x = -PLAYER_SPEED
         elif self.right_pressed and not self.left_pressed:
@@ -223,6 +241,11 @@ class Game(arcade.Window):
                                                           0.14)
         self.enemy_list.update()
         self.player_list.update()
+        self.wall_of_death.update(delta_time)
+        self.pp_eng.update()
+        dead_player = arcade.check_for_collision(self.wall_of_death, self.player)
+        if dead_player:
+            self.player.live = False
         c_bugs = arcade.check_for_collision_with_list(self.player, self.bugs)
         for bug in c_bugs:
             bug.remove_from_sprite_lists()
