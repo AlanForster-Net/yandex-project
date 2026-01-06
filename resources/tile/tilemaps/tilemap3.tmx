@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="64" height="60" tilewidth="16" tileheight="16" infinite="0" nextlayerid="6" nextobjectid="1">
+ <tileset firstgid="1" source="../tileset1.tsx"/>
+ <layer id="5" name="collision" width="64" height="60">
+  <data encoding="base64" compression="zlib">
+   eJzt2FsKgCAQAMCg+9+53xB7aJkbOwN+hJaurgYuCwAAAAAAAAAAAPA3q5KW+MUv/rxmx5+9/9LT8bT+02bEf7fPL8YWbf2PnI3z7prX6nvjL9/bP4/Ov5Z4r9qNXv/o+RXlrJg1T5HPvy/6eGv/97ZvOddGzFtP/kfYz0fzcnYuX32npz6q1vzPcCeQ/U5E/PWyAckjAlY=
+  </data>
+ </layer>
+ <layer id="1" name="wall" width="64" height="60">
+  <data encoding="base64" compression="zlib">
+   eJzt1EEOwiAQBVBq9P5XduPCGJHOWArKe8ksmjZt/wxQCgAAAAAAAAAAAPBrbqpcFy355Zd//H+smn971Kr5j+7HFnzHiPx7/++MtTHb/DO92Dvzd/ez+V+/93wdmVtmxpG8red6z3/0+daqSP6eWUb1aebz74xvHLX/s89HzrUefcus/xn2c60vn87lTP5Z8n7Tn9b8L5X6N7Wc8q+d/w5wOBDg
+  </data>
+ </layer>
+ <layer id="2" name="trap" width="64" height="60">
+  <data encoding="base64" compression="zlib">
+   eJztzwENAAAIw7ALwb9ODNwApE0mYAkAAAAAAAAAAAAAAAAAwA3zLP/+mwX3lxER
+  </data>
+ </layer>
+ <layer id="3" name="end" width="64" height="60">
+  <data encoding="base64" compression="zlib">
+   eJztzjEBAAAMAiA7rX+3xdADEpAAAAAAAAAAAAAAAAAAAGy4dgAGPNaYADQ=
+  </data>
+ </layer>
+ <layer id="4" name="bug" width="64" height="60">
+  <data encoding="base64" compression="zlib">
+   eJzt1LENADAIA0E2y/5bUVKSAgklupvAzTsCAAAAAAAAAAAAAIDO2R4AH7jpSGvAK/wVzNMVlASiVQE8
+  </data>
+ </layer>
+</map>
