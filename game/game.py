@@ -32,11 +32,15 @@ TILE_SCALE = 2.5
 # classes
 class Player(arcade.Sprite):
     def __init__(self, x, y, scale=2):
-        super().__init__('players_frames/idle.png', scale=scale)
+        super().__init__('resources/players_frames/pack1/idle.png', scale=scale)
+        #some attributes
+        self.live = True
+        #posiotion of player
         self.center_x = x
         self.center_y = y
         self.change_x = 0
         self.change_y = 0
+        #movement things
         self.jumps_remaining = MAX_JUMPS
         self.max_jumps = MAX_JUMPS
         self.double_jump = False
@@ -45,22 +49,28 @@ class Player(arcade.Sprite):
         self.stamina_refresh_speed = STAMINA_REFRESH_SPEED
         self.stamina_using_speed = SPEED_OF_USING_STAMINA
         self.stamina_using_value = STAMINA_USING_VALUE
+        #textures
         self.frames = dict()
-        self.current_frame = 0
-        self.animation_speed = 0.0
-        self.animation_timer = 0
         self.frames["running_right"] = list()
         self.frames["running_left"] = list()
         self.frames["running_jump"] = list()
-        self.frames["die"] = arcade.load_texture("players_frames/die.png")
-        self.frames["idle"] = arcade.load_texture("players_frames/idle.png")
-        self.frames["jump"] = arcade.load_texture("players_frames/jump_1.png")
-        self.live = True
+        self.frames["die"] = None
+        self.frames["idle"] = None
+        self.frames["jump"] = None
+        #base skin
+        self.frames["die"] = arcade.load_texture("resources/players_frames/pack1/die.png")
+        self.frames["idle"] = arcade.load_texture("resources/players_frames/pack1/idle.png")
+        self.frames["jump"] = arcade.load_texture("resources/players_frames/pack1/jump.png")
         for i in range(1, 5):
-            self.frames["running_right"].append(arcade.load_texture(f"players_frames/run_r_{i}.png"))
+            self.frames["running_right"].append(arcade.load_texture(f"resources/players_frames/pack1/run_r_{i}.png"))
 
         for i in range(1, 5):
-            self.frames["running_left"].append(arcade.load_texture(f"players_frames/run_l_{i}.png"))
+            self.frames["running_left"].append(arcade.load_texture(f"resources/players_frames/pack1/run_l_{i}.png"))
+
+        #animation
+        self.current_frame = 0
+        self.animation_speed = 0.0
+        self.animation_timer = 0
 
     def update(self, delta_time=1 / 60):
         super().update()
@@ -97,6 +107,18 @@ class Player(arcade.Sprite):
         elif abs(self.change_x) == 0:
             self.texture = self.frames["idle"]
             self.animation_timer = 0
+
+    def update_skin(self, pack_of_skin):
+        self.frames["die"] = arcade.load_texture(f"resources/players_frames/pack{pack_of_skin}/die.png")
+        self.frames["idle"] = arcade.load_texture(f"resources/players_frames/pack{pack_of_skin}/idle.png")
+        self.frames["jump"] = arcade.load_texture(f"resources/players_frames/pack{pack_of_skin}/jump.png")
+        self.frames["running_right"].clear()
+        self.frames["running_left"].clear()
+        for i in range(1, 5):
+            self.frames["running_right"].append(arcade.load_texture(f"resources/players_frames/pack{pack_of_skin}/run_r_{i}.png"))
+
+        for i in range(1, 5):
+            self.frames["running_left"].append(arcade.load_texture(f"resources/players_frames/pack{pack_of_skin}/run_l_{i}.png"))
 
 class WallOfDeath(arcade.Sprite):
     def __init__(self, x, y, scale=1.25):
@@ -156,7 +178,7 @@ class Game(arcade.Window):
 
     def setup(self):
         self.music_player = self.main_theme.play(volume=0.3, loop=True)
-        self.player = Player(100, 100 // 2)
+        self.player = Player(100, 100 // 2, 4)
         self.player_list = arcade.SpriteList()
         self.player_list.append(self.player)
         self.bug_count = 0
