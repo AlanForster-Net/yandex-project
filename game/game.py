@@ -1,3 +1,5 @@
+from curses.textpad import rectangle
+
 import arcade
 import sqlite3
 
@@ -8,8 +10,8 @@ from arcade.experimental.query_demo import SCREEN_HEIGHT, SCREEN_WIDTH
 from pyglet.event import EVENT_HANDLE_STATE
 
 # Constants
-SCREEN_HEIGHT = 1024
-SCREEN_WIDTH = 960
+SCREEN_WIDTH = 1980
+SCREEN_HEIGHT = 1080
 
 # Player const
 PLAYER_SPEED = 1.5
@@ -36,6 +38,7 @@ class Player(arcade.Sprite):
         super().__init__('resources/players_frames/pack1/idle.png', scale=scale)
         #some attributes
         self.live = True
+        self.pack_of_skin = 1
         #posiotion of player
         self.center_x = x
         self.center_y = y
@@ -75,10 +78,19 @@ class Player(arcade.Sprite):
 
     def update(self, delta_time=1 / 60):
         super().update()
+        #easter with "капустка"
+        if self.pack_of_skin == "easter_pack":
+            self.texture = arcade.load_texture("resources/players_frames/easter_pack/капустка.jpg")
+            return
+        #checking for alive and change texture
         if not self.live:
             self.texture = self.frames["die"]
             return
+        #animation
         self.animation_timer += delta_time
+        if self.change_y != 0:
+            self.texture = self.frames["jump"]
+
         if abs(self.change_x) == PLAYER_SPEED:
             self.animation_speed = 0.2
             if self.change_x > 0:
@@ -110,6 +122,13 @@ class Player(arcade.Sprite):
             self.animation_timer = 0
 
     def update_skin(self, pack_of_skin):
+        self.pack_of_skin = pack_of_skin
+        #easter pack
+        if self.pack_of_skin == "easter_pack":
+            self.scale = 0.05
+            self.center_y = 150
+            return
+        #texture from normal packs
         self.frames["die"] = arcade.load_texture(f"resources/players_frames/pack{pack_of_skin}/die.png")
         self.frames["idle"] = arcade.load_texture(f"resources/players_frames/pack{pack_of_skin}/idle.png")
         self.frames["jump"] = arcade.load_texture(f"resources/players_frames/pack{pack_of_skin}/jump.png")
@@ -147,7 +166,7 @@ class WallOfDeath(arcade.Sprite):
 
 class Game(arcade.Window):
     def __init__(self, n=1, title="game"):
-        super().__init__(SCREEN_WIDTH, SCREEN_HEIGHT, title=title, fullscreen=False)
+        super().__init__(SCREEN_WIDTH, SCREEN_HEIGHT, title=title, fullscreen=True)
         arcade.set_background_color(arcade.color.PINK)
         self.player = None
         self.player_list = None
@@ -195,6 +214,7 @@ class Game(arcade.Window):
                                                      gravity_constant=GRAVITY)
         arcade.schedule(self.update_timer, 1.0)
         self.setup_players_database()
+        self.player.update_skin("easter_pack")
 
     def on_draw(self):
         self.clear()
@@ -208,6 +228,9 @@ class Game(arcade.Window):
         self.gui_camera.use()
         self.gui_draw()
 
+    def gui_draw(self):
+        arcade.draw_lbwh_rectangle_filled(SCREEN_WIDTH - 275, 25, 300, 50, arcade.color.WHITE)
+
     def on_update(self, delta_time=1 / 60):
         if self.left_pressed and not self.right_pressed:
             self.player.change_x = -PLAYER_SPEED
@@ -215,7 +238,7 @@ class Game(arcade.Window):
             self.player.change_x = PLAYER_SPEED
         elif not self.left_pressed and not self.right_pressed:
             self.player.change_x = 0
-
+        #climbing on ladder
         is_on_ladder = self.pp_eng.is_on_ladder()
         if is_on_ladder:
             # По лестнице вверх/вниз
@@ -225,7 +248,7 @@ class Game(arcade.Window):
                 self.player.change_y = -LADDER_SPEED
             else:
                 self.player.change_y = 0
-
+        #jump
         is_on_ground = self.pp_eng.can_jump()
         if is_on_ground:
             if not self.player.was_on_ground:
@@ -241,7 +264,7 @@ class Game(arcade.Window):
 
         if not self.space_pressed:
             self.space_just_pressed = False
-
+        #running
         if self.shift_pressed and self.right_pressed and self.player.stamina > 0:
             self.player.change_x = SHIFT_SPEED
             self.player.stamina -= self.player.stamina_using_speed * delta_time
@@ -258,15 +281,15 @@ class Game(arcade.Window):
             self.player.change_x = PLAYER_SPEED
         elif self.shift_pressed and self.left_pressed:
             self.player.change_x = -PLAYER_SPEED
-
+        #dash
         if self.dash_button and self.right_pressed and self.player.stamina >= 1:
             self.player.stamina -= self.player.stamina_using_value
-            self.player.change_x = 0
+            # self.player.change_x = 0
             self.player.center_x += DASH_GAP
             self.dash_button = False
         elif self.dash_button and self.left_pressed and self.player.stamina >= 1:
             self.player.stamina -= self.player.stamina_using_value
-            self.player.change_x = 0
+            # self.player.change_x = 0
             self.player.center_x -= DASH_GAP
             self.dash_button = False
 
@@ -279,6 +302,7 @@ class Game(arcade.Window):
         self.wall_of_death.update(delta_time)
         self.pp_eng.update()
         dead_player = arcade.check_for_collision(self.wall_of_death, self.player)
+        #chacking for alive and here game will stop
         if dead_player:
             self.player.live = False
             self.end_game()
@@ -310,10 +334,10 @@ class Game(arcade.Window):
             self.tilemap = arcade.load_tilemap(f"resources/tile/tilemaps/tilemap{self.n}.tmx")
             self.init_scene(self.tilemap)
 
-    def gui_draw(self):
+    def end_game(self):
         pass
 
-    def end_game(self):
+    def win_game(self):
         pass
 
     def scores_and_results(self):
