@@ -13,6 +13,7 @@ SCREEN_WIDTH = 960
 
 # Player const
 PLAYER_SPEED = 1.5
+LADDER_SPEED = 2
 JUMP_SPEED = 10
 MAX_JUMPS = 2
 DASH_GAP = 60
@@ -165,6 +166,8 @@ class Game(arcade.Window):
         self.space_just_pressed = False
         self.shift_pressed = False
         self.dash_button = False
+        self.w_pressed = False
+        self.s_pressed = False
         self.timer_running = 0
         self.main_theme = arcade.load_sound("resources/sound/soundtrack.mp3")
         self.music_player = None
@@ -212,6 +215,16 @@ class Game(arcade.Window):
             self.player.change_x = PLAYER_SPEED
         elif not self.left_pressed and not self.right_pressed:
             self.player.change_x = 0
+
+        is_on_ladder = self.pp_eng.is_on_ladder()
+        if is_on_ladder:
+            # По лестнице вверх/вниз
+            if self.w_pressed and not self.s_pressed:
+                self.player.change_y = LADDER_SPEED
+            elif self.s_pressed and not self.w_pressed:
+                self.player.change_y = -LADDER_SPEED
+            else:
+                self.player.change_y = 0
 
         is_on_ground = self.pp_eng.can_jump()
         if is_on_ground:
@@ -320,6 +333,10 @@ class Game(arcade.Window):
             self.shift_pressed = True
         if key == arcade.key.Q:
             self.dash_button = True
+        if key == arcade.key.W:
+            self.w_pressed = True
+        if key == arcade.key.S:
+            self.s_pressed = True
 
     def on_key_release(self, key, modifiers):
         if key == arcade.key.A:
@@ -332,6 +349,10 @@ class Game(arcade.Window):
             self.shift_pressed = False
         elif key == arcade.key.Q:
             self.dash_button = False
+        if key == arcade.key.W:
+            self.w_pressed = False
+        if key == arcade.key.S:
+            self.s_pressed = False
 
     def setup_players_database(self):
         pass
