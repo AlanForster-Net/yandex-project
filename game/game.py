@@ -157,7 +157,7 @@ class WallOfDeath(arcade.Sprite):
         self.height *= 2
 
     def update(self, delta_time):
-        self.width += delta_time * self.expending_speed
+        # self.width += delta_time * self.expending_speed
         self.animation_timer += delta_time
         if self.animation_timer >= self.animation_speed:
             self.animation_timer = 0
@@ -214,6 +214,7 @@ class Game(arcade.Window):
                                                      gravity_constant=GRAVITY)
         arcade.schedule(self.update_timer, 1.0)
         self.setup_players_database()
+        self.player.update_skin(2)
 
     def on_draw(self):
         self.clear()
@@ -237,6 +238,7 @@ class Game(arcade.Window):
             arcade.draw_lbwh_rectangle_filled(SCREEN_WIDTH - 70, 28, 95, 44, arcade.color.BLACK)
 
     def on_update(self, delta_time=1 / 60):
+        self.pp_eng.update()
         if self.left_pressed and not self.right_pressed:
             self.player.change_x = -PLAYER_SPEED
         elif self.right_pressed and not self.left_pressed:
@@ -305,7 +307,6 @@ class Game(arcade.Window):
         self.enemy_list.update()
         self.player_list.update()
         self.wall_of_death.update(delta_time)
-        self.pp_eng.update()
         dead_player = arcade.check_for_collision(self.wall_of_death, self.player)
         #chacking for alive and here game will stop
         if dead_player:
