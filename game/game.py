@@ -20,7 +20,7 @@ JUMP_SPEED = 10
 MAX_JUMPS = 2
 DASH_GAP = 60
 SHIFT_SPEED = 3
-SPEED_OF_USING_STAMINA = 0.12
+SPEED_OF_USING_STAMINA = 0.2
 STAMINA_REFRESH_SPEED = 0.5
 STAMINA_USING_VALUE = 1.0
 
@@ -214,7 +214,6 @@ class Game(arcade.Window):
                                                      gravity_constant=GRAVITY)
         arcade.schedule(self.update_timer, 1.0)
         self.setup_players_database()
-        self.player.update_skin("easter_pack")
 
     def on_draw(self):
         self.clear()
@@ -229,7 +228,13 @@ class Game(arcade.Window):
         self.gui_draw()
 
     def gui_draw(self):
-        arcade.draw_lbwh_rectangle_filled(SCREEN_WIDTH - 275, 25, 300, 50, arcade.color.WHITE)
+        arcade.draw_lbwh_rectangle_filled(SCREEN_WIDTH - 275, 25, 305, 50, arcade.color.WHITE)
+        if self.player.stamina >= 1:
+            arcade.draw_lbwh_rectangle_filled(SCREEN_WIDTH - 270, 28, 95, 44, arcade.color.BLACK)
+        if self.player.stamina >= 2:
+            arcade.draw_lbwh_rectangle_filled(SCREEN_WIDTH - 170, 28, 95, 44, arcade.color.BLACK)
+        if self.player.stamina >= 3:
+            arcade.draw_lbwh_rectangle_filled(SCREEN_WIDTH - 70, 28, 95, 44, arcade.color.BLACK)
 
     def on_update(self, delta_time=1 / 60):
         if self.left_pressed and not self.right_pressed:
