@@ -22,7 +22,7 @@ STAMINA_USING_VALUE = 1.0
 
 # Physic const
 GRAVITY = 0.8
-MAX_LEVEL = 3
+MAX_LEVEL = 5
 TILE_SCALE = 2.5
 
 
