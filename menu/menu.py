@@ -6,12 +6,13 @@ from handlers.screen_handler import check_screen, get_screen_data
 
 
 TITLE = "Run from antivirus! — Idle"
+SCREEN = arcade.get_screens()[get_screen_data("screenNum")]
 
 
 class gameGUI(arcade.Window):
     def __init__(self):
         super().__init__(get_screen_data("screenWidth"), get_screen_data("screenHeight"), title=TITLE,
-                         fullscreen=True, screen=arcade.get_screens()[get_screen_data("screenNum")])
+                         fullscreen=True, screen=SCREEN, center_window=False)
         arcade.set_background_color(arcade.color.GRAY)
         self.manager = UIManager()
         self.manager.enable()

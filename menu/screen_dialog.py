@@ -23,8 +23,6 @@ def get_sc():
 
 
 class Dialog(arcade.Window):
-    CHOSEN = None
-
     def __init__(self):
         super().__init__(SCREEN_WIDTH, SCREEN_HEIGHT, title=TITLE, fullscreen=False)
         self.flat_button = None
@@ -36,17 +34,17 @@ class Dialog(arcade.Window):
         self.setup_widgets()
         self.anchor_layout.add(self.box_layout)
         self.manager.add(self.anchor_layout)
+        self.setup_clicks()
 
-    def update_chosen(self, value):
-        self.CHOSEN = int(value.new_value.split('.')[0]) - 1
-        self.flat_button.on_click = lambda event: writer(JSONPATH, arcade.get_screens()[self.CHOSEN], self.CHOSEN)
-        self.flat_button.on_click = lambda event: arcade.close_window()
+    def button_handler(self):
+        current = int(self.dropdown.value.split(".")[0]) - 1
+        writer(JSONPATH, arcade.get_screens()[current], current)
+        arcade.close_window()
 
     def setup_widgets(self):
         screens = get_sc()
-        dropdown = UIDropdown(options=screens, width=200, color=arcade.color.BLACK)
-        dropdown.on_change = lambda value: self.update_chosen(value)
-        self.box_layout.add(dropdown)
+        self.dropdown = UIDropdown(options=screens, width=200, color=arcade.color.BLACK, default=screens[0])
+        self.box_layout.add(self.dropdown)
         self.flat_button = UIFlatButton(text="Выбрать экран", width=200, height=50, color=arcade.color.BLACK)
         self.box_layout.add(self.flat_button)
 
@@ -54,3 +52,5 @@ class Dialog(arcade.Window):
         self.clear()
         self.manager.draw()
 
+    def setup_clicks(self):
+        self.flat_button.on_click = lambda a: self.button_handler()
