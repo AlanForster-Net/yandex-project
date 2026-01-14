@@ -22,7 +22,7 @@ STAMINA_USING_VALUE = 1.0
 
 # Physic const
 GRAVITY = 0.8
-MAX_LEVEL = 1
+MAX_LEVEL = 5
 TILE_SCALE = 2.5
 
 
@@ -97,20 +97,24 @@ class WallOfDeath(arcade.Sprite):
 
 
 class Game(arcade.Window):
-    def __init__(self, n=1, title="game"):
+    def __init__(self, title="game"):
         super().__init__(SCREEN_WIDTH, SCREEN_HEIGHT, title=title, fullscreen=False)
         arcade.set_background_color(arcade.color.PINK)
         self.player = None
         self.player_list = None
         self.background_color = arcade.color.BLACK
-        self.tilemap = arcade.load_tilemap(f"resources/tile/tilemaps/tilemap{n}.tmx", scaling=TILE_SCALE)
-        self.n = n
+        self.n = 1
+        self.tilemap = arcade.load_tilemap(f"resources/tile/tilemaps/tilemap{self.n}.tmx", scaling=TILE_SCALE)
         self.walls = arcade.SpriteList()
         self.collisions = arcade.SpriteList()
         self.traps = arcade.SpriteList()
         self.bugs = arcade.SpriteList()
         self.end = arcade.SpriteList()
-        self.init_scene(self.tilemap)
+        self.walls = self.tilemap.sprite_lists["wall"]
+        self.collisions = self.tilemap.sprite_lists["collision"]
+        self.traps = self.tilemap.sprite_lists["trap"]
+        self.bugs = self.tilemap.sprite_lists["bug"]
+        self.end = self.tilemap.sprite_lists["end"]
         self.left_pressed = False
         self.right_pressed = False
         self.space_pressed = False
@@ -120,13 +124,6 @@ class Game(arcade.Window):
         self.timer_running = 0
         self.main_theme = arcade.load_sound("resources/sound/soundtrack.mp3")
         self.music_player = None
-
-    def init_scene(self, tilemap):
-        self.walls = self.tilemap.sprite_lists["wall"]
-        self.collisions = self.tilemap.sprite_lists["collision"]
-        self.traps = self.tilemap.sprite_lists["trap"]
-        self.bugs = self.tilemap.sprite_lists["bug"]
-        self.end = self.tilemap.sprite_lists["end"]
 
     def setup(self):
         self.music_player = self.main_theme.play(volume=0.3, loop=True)
@@ -236,23 +233,34 @@ class Game(arcade.Window):
                 self.player.stamina = 3.0
 
     def next_level(self):
-        if self.n == MAX_LEVEL:
+        self.n += 1
+        if self.n > MAX_LEVEL:
             self.win_game()
         else:
-            self.n += 1
-            self.tilemap = arcade.load_tilemap(f"resources/tile/tilemaps/tilemap{self.n}.tmx")
-            self.init_scene(self.tilemap)
+            self.tilemap = arcade.load_tilemap(f"resources/tile/tilemaps/tilemap{self.n}.tmx", scaling=TILE_SCALE)
+            self.walls = self.tilemap.sprite_lists["wall"]
+            self.collisions = self.tilemap.sprite_lists["collision"]
+            self.traps = self.tilemap.sprite_lists["trap"]
+            self.bugs = self.tilemap.sprite_lists["bug"]
+            self.end = self.tilemap.sprite_lists["end"]
+            self.pp_eng = arcade.PhysicsEnginePlatformer(player_sprite=self.player,
+                                                         platforms=self.collisions,
+                                                         gravity_constant=GRAVITY)
+            self.player.center_x = 100
+            self.player.center_y = 100
 
     def gui_draw(self):
         pass
 
     def end_game(self):
-        pass
+        arcade.close_window()
 
     def scores_and_results(self):
         pass
 
     def on_key_press(self, key, modifiers):
+        if key == arcade.key.BACKSPACE:
+            self.next_level()
         if key == arcade.key.ESCAPE:
             arcade.close_window()
         if key == arcade.key.D:
@@ -285,9 +293,12 @@ class Game(arcade.Window):
     def write_data_in_database(self):
         pass
 
+    def win_game(self):
+        arcade.close_window()
+
 
 def setup_game():
-    win = Game(1)
+    win = Game()
     win.setup()
     arcade.run()
 
