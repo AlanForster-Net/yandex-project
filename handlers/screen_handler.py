@@ -24,5 +24,8 @@ def check_screen():
 
 
 def get_screen_data(typ):
-    data = reader(JSONPATH)
-    return data[typ]
+    try:
+        data = reader(JSONPATH)
+        return data[typ]
+    except KeyError:
+        return 0

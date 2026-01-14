@@ -1,18 +1,23 @@
 import arcade
 from arcade.gui import UIManager, UIFlatButton, UITextureButton, UILabel
 from arcade.gui.widgets.layout import UIAnchorLayout, UIBoxLayout
+from pyglet.event import EVENT_HANDLE_STATE
+
 from game.game import Game
-from handlers.screen_handler import check_screen, get_screen_data
+from handlers.screen_handler import check_screen, get_screen_data, JSONPATH
+from handlers.json_handler import cleaner
 
 
 TITLE = "Run from antivirus! — Idle"
 SCREEN = arcade.get_screens()[get_screen_data("screenNum")]
 
 
-class gameGUI(arcade.Window):
+class GameGUI(arcade.Window):
     def __init__(self):
         super().__init__(get_screen_data("screenWidth"), get_screen_data("screenHeight"), title=TITLE,
-                         fullscreen=True, screen=SCREEN, center_window=False)
+                         fullscreen=False, screen=SCREEN, center_window=False)
+        self.set_location(0, 108)
+        self.set_fullscreen()
         arcade.set_background_color(arcade.color.GRAY)
         self.manager = UIManager()
         self.manager.enable()
@@ -30,7 +35,7 @@ class gameGUI(arcade.Window):
                         align="center")
         self.box_layout.add(label)
         flat_button = UIFlatButton(text="Плоская Кнопка", width=200, height=50, color=arcade.color.BLUE)
-        flat_button.on_click = self.pressBlue
+        flat_button.on_click = self.press_blue
         texture_normal = arcade.load_texture("resources/img/заглушка3.png")
         texture_button = UITextureButton(texture=texture_normal,
                                          texture_hovered=texture_normal,
@@ -46,17 +51,32 @@ class gameGUI(arcade.Window):
                                          scale=1.0)
         self.box_layout.add(texture_button1)
         self.box_layout.add(flat_button)
+        exit_with_open = UIFlatButton(text="Выйти из игры (с выбором монитора)",
+                                   width=325, height=50, color=arcade.color.BLUE)
+        exit_with_open.on_click = lambda a: self.clear_file_and_close_event()
+        self.box_layout.add(exit_with_open)
+
+
 
     def on_draw(self):
         self.clear()
         self.manager.draw()
         pass
 
-    def pressBlue(self, junk):
+    def press_blue(self, junk):
         check_screen()
         win = Game(1)
         win.setup()
         arcade.run()
+        arcade.close_window()
 
     def on_mouse_press(self, x, y, button, modifiers):
         pass
+
+    def on_key_press(self, key, modifiers):
+        if key == arcade.key.ESCAPE:
+            arcade.close_window()
+
+    def clear_file_and_close_event(self):
+        cleaner(JSONPATH)
+        arcade.close_window()

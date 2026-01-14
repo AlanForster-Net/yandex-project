@@ -1,5 +1,5 @@
 import arcade
-from menu.menu import gameGUI
+from menu.menu import GameGUI
 from handlers.screen_handler import check_screen
 from menu.screen_dialog import run_dialog
 
@@ -7,7 +7,7 @@ from menu.screen_dialog import run_dialog
 def run():
     if check_screen():
         run_dialog()
-    _ = gameGUI()
+    _ = GameGUI()
     arcade.run()
 
 

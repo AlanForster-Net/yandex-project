@@ -5,12 +5,12 @@ from arcade.examples.camera_platform import JUMP_SPEED
 from pyglet.graphics import Batch
 from arcade.experimental.query_demo import SCREEN_HEIGHT, SCREEN_WIDTH
 from pyglet.event import EVENT_HANDLE_STATE
+from handlers.screen_handler import get_screen_data
 
 
 # Constants
-TITLE = "Run from antivirus! — Idle"
-SCREEN_HEIGHT = 720
-SCREEN_WIDTH = 1280
+TITLE = "Run from antivirus! — Level 1"
+SCREEN = arcade.get_screens()[get_screen_data("screenNum")]
 
 # Player const
 PLAYER_SPEED = 1.5
@@ -57,7 +57,8 @@ class WallOfDeath(arcade.Sprite):
 
 class Game(arcade.Window):
     def __init__(self, n=1):
-        super().__init__(SCREEN_WIDTH, SCREEN_HEIGHT, title=TITLE, fullscreen=True)
+        super().__init__(get_screen_data("screenWidth"), get_screen_data("screenHeight"), title=TITLE,
+                         fullscreen=True, screen=SCREEN, center_window=False)
         arcade.set_background_color(arcade.color.PINK)
         self.player = None
         self.player_list = None
