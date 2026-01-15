@@ -219,24 +219,51 @@ class Game(arcade.Window):
         self.setup_players_database()
 
     def gui_draw(self):
-        screen_width = get_screen_data("screenWidth")
-        screen_height = get_screen_data("screenHeight")
-        panel_width = 305
-        panel_height = 50
-        panel_x = screen_width - panel_width - 20
-        panel_y = 20
-        arcade.draw_lbwh_rectangle_filled(panel_x, panel_y, panel_width, panel_height, arcade.color.WHITE)
-        segment_width = 95
-        segment_height = 44
-        segment_y = panel_y + 3
+        #Расчёт масштаба по экрану
+        scale = self.width / SCREEN_WIDTH * 0.7
+        #Уменьшения скейла
+        left_shift = 50 * scale
+        #Размеры подложки учитывая масштаб
+        panel_width = int(305 * scale)
+        panel_height = int(50 * scale)
+        #расчёт позиции с учётом смещение влева и масштаба
+        panel_x = int(self.width - (275 * scale) - left_shift)
+        panel_y = int(25 * scale)
+        #Отрисовка подложки
+        arcade.draw_lbwh_rectangle_filled(
+            panel_x, panel_y, panel_width, panel_height, arcade.color.WHITE
+        )
+        #Расчёт размера сегмента с учётом масштаба
+        segment_width = int(95 * scale)
+        segment_height = int(44 * scale)
+        segment_y = int(panel_y + 3 * scale)
+        #Смещение с сегментов с учётом масштаба
+        segment_offset = 5 * scale
+
         if self.player.stamina >= 1:
-            arcade.draw_lbwh_rectangle_filled(panel_x + 5, segment_y, segment_width, segment_height, arcade.color.BLACK)
+            arcade.draw_lbwh_rectangle_filled(
+                int(panel_x + segment_offset),
+                segment_y,
+                segment_width,
+                segment_height,
+                arcade.color.BLACK
+            )
         if self.player.stamina >= 2:
-            arcade.draw_lbwh_rectangle_filled(panel_x + 5 + 100, segment_y, segment_width, segment_height,
-                                              arcade.color.BLACK)
+            arcade.draw_lbwh_rectangle_filled(
+                int(panel_x + segment_offset + segment_width + (5 * scale)),
+                segment_y,
+                segment_width,
+                segment_height,
+                arcade.color.BLACK
+            )
         if self.player.stamina >= 3:
-            arcade.draw_lbwh_rectangle_filled(panel_x + 5 + 200, segment_y, segment_width, segment_height,
-                                              arcade.color.BLACK)
+            arcade.draw_lbwh_rectangle_filled(
+                int(panel_x + segment_offset + (segment_width * 2) + (10 * scale)),
+                segment_y,
+                segment_width,
+                segment_height,
+                arcade.color.BLACK
+            )
 
     def on_draw(self):
         self.clear()
@@ -311,7 +338,6 @@ class Game(arcade.Window):
             self.player.change_x = 0
             self.player.center_x -= DASH_GAP
             self.dash_button = False
-
         self.pp_eng.update()
         pos = (self.player.center_x, self.player.center_y)
         self.player_camera.position = arcade.math.lerp_2d(self.player_camera.position,
