@@ -1,20 +1,31 @@
-from handlers.json_handler import reader
-import os
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-PATH = os.path.join(BASE_DIR, "../", "data", "cfg.json")
+import arcade
+from handlers.json_handler import reader, generate
 
 
-
-def get_primary_screen():
-    data = reader(PATH)
-    if 'primary_display' in data.keys():
-        return data['primary_display']
-    else:
-        return -1
-
-print(get_primary_screen())
+JSONPATH = 'data/cfg.json'
 
 
+def check_screen():
+    generate(JSONPATH)
+    data = reader(JSONPATH)
+    try:
+        num = data["screenNum"]
+        name_from_file = data["screenName"]
+        width_from_file = data["screenWidth"]
+        height_from_file = data["screenHeight"]
+        screen_data = arcade.get_screens()[num]
+    except KeyError:
+        return 1
+    if (name_from_file != screen_data.get_monitor_name() or
+        width_from_file != screen_data.width or
+        height_from_file != screen_data.height):
+        return 1
+    return 0
 
 
-
+def get_screen_data(typ):
+    try:
+        data = reader(JSONPATH)
+        return data[typ]
+    except KeyError:
+        return 0
