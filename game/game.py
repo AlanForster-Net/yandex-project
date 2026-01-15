@@ -27,7 +27,7 @@ STAMINA_USING_VALUE = 1.0
 ENEMY_SPEED = 150
 # Physic const
 GRAVITY = 0.8
-MAX_LEVEL = 1
+MAX_LEVEL = 2
 TILE_SCALE = 2.5
 
 
@@ -164,7 +164,8 @@ class WallOfDeath(arcade.Sprite):
 
 class Game(arcade.Window):
     def __init__(self, n=1, title="game"):
-        super().__init__(get_screen_data("screenWidth"), get_screen_data("screenHeight"), title=title, fullscreen=True)
+        super().__init__(get_screen_data("screenWidth"), get_screen_data("screenHeight"), title=title, fullscreen=True,
+                         screen=SCREEN)
         arcade.set_background_color(arcade.color.PINK)
         self.player = None
         self.player_list = None
