@@ -9,6 +9,5 @@ def run():
         run_dialog()
     _ = GameGUI()
     arcade.run()
-
 if __name__ == "__main__":
     run()

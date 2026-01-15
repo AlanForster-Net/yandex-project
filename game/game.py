@@ -87,7 +87,7 @@ class Player(arcade.Sprite):
             return
         #animation
         self.animation_timer += delta_time
-        if self.change_y != 0:
+        if self.change_y != 0 and self.change_x == 0:
             self.texture = self.frames["jump"]
         if abs(self.change_x) == PLAYER_SPEED:
             self.animation_speed = 0.2
@@ -115,7 +115,7 @@ class Player(arcade.Sprite):
                     self.current_frame = (self.current_frame + 1) % 4
                     self.texture = self.frames["running_left"][self.current_frame]
 
-        elif abs(self.change_x) == 0:
+        elif abs(self.change_x) == 0 and self.change_y == 0:
             self.texture = self.frames["idle"]
             self.animation_timer = 0
 
@@ -203,7 +203,7 @@ class Game(arcade.Window):
 
     def setup(self):
         self.music_player = self.main_theme.play(volume=0.3, loop=True)
-        self.player = Player(100, 100 // 2, 4)
+        self.player = Player(100, 100 // 2, 3)
         self.player_list = arcade.SpriteList()
         self.player_list.append(self.player)
         self.bug_count = 0
