@@ -54,7 +54,7 @@ class gameGUI(arcade.Window):
         pass
 
     def pressBlue(self, junk):
-        win = Game(1)
+        win = Game('1')
         win.setup()
         arcade.run()
 
