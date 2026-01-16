@@ -278,12 +278,23 @@ class Game(arcade.Window):
         self.gui_draw()
 
     def on_update(self, delta_time=1 / 60):
+        base_speed = PLAYER_SPEED #new variable for speed(walking)
+        if self.shift_pressed and self.player.stamina > 0:
+            base_speed = SHIFT_SPEED # running
+            self.player.stamina -= self.player.stamina_using_speed * delta_time
+        #determine the direction of the vector
         if self.left_pressed and not self.right_pressed:
-            self.player.change_x = -PLAYER_SPEED
+            self.player.change_x = -base_speed
+            #calculate stamina if player running
+            if self.shift_pressed and self.player.stamina > 0:
+                self.player.running_left = True
         elif self.right_pressed and not self.left_pressed:
-            self.player.change_x = PLAYER_SPEED
-        elif not self.left_pressed and not self.right_pressed:
+            self.player.change_x = base_speed
+            if self.shift_pressed and self.player.stamina > 0:
+                self.player.running_right = True
+        else:
             self.player.change_x = 0
+
         #climbing on ladder
         is_on_ladder = self.pp_eng.is_on_ladder()
         if is_on_ladder:
@@ -310,23 +321,6 @@ class Game(arcade.Window):
 
         if not self.space_pressed:
             self.space_just_pressed = False
-        #running
-        if self.shift_pressed and self.right_pressed and self.player.stamina > 0:
-            self.player.change_x = SHIFT_SPEED
-            self.player.stamina -= self.player.stamina_using_speed * delta_time
-            self.player.running_right = True
-            if self.player.stamina < 0:
-                self.player.stamina = 0
-        elif self.shift_pressed and self.left_pressed and self.player.stamina > 0:
-            self.player.stamina -= self.player.stamina_using_speed * delta_time
-            self.player.change_x = -SHIFT_SPEED
-            self.player.running_left = True
-            if self.player.stamina < 0:
-                self.player.stamina = 0
-        elif self.shift_pressed and self.right_pressed:
-            self.player.change_x = PLAYER_SPEED
-        elif self.shift_pressed and self.left_pressed:
-            self.player.change_x = -PLAYER_SPEED
         #dash
         if self.dash_button and self.right_pressed and self.player.stamina >= 1:
             self.player.stamina -= self.player.stamina_using_value
