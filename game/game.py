@@ -24,7 +24,7 @@ STAMINA_REFRESH_SPEED = 0.5
 STAMINA_USING_VALUE = 1.0
 
 # Enemy const
-ENEMY_SPEED = 150
+ENEMY_SPEED = 1
 # Physic const
 GRAVITY = 0.8
 MAX_LEVEL = 5
@@ -140,32 +140,33 @@ class Player(arcade.Sprite):
 
 class WallOfDeath(arcade.Sprite):
     def __init__(self, x, y, scale=1.25):
-        super().__init__('resources/img/variant_for_wall.png', scale=scale)
+        super().__init__('resources/enemy_frames/death_wall(1).png', scale=scale)
         self.center_x = x
         self.center_y = y
 
-        self.frames = [arcade.load_texture("resources/img/variant_for_wall.png"),
-                       arcade.load_texture("resources/img/variant_for_wall_2.png")]
-        self.animation_speed = 5.0
+        self.frames = [arcade.load_texture("resources/enemy_frames/death_wall(1).png"),
+                       arcade.load_texture("resources/enemy_frames/death_wall(2).png"),
+                       arcade.load_texture("resources/enemy_frames/death_wall(3).png")]
+        self.animation_speed = 0.8
         self.current_frame = 0
         self.animation_timer = 0
 
-        self.expending_speed = ENEMY_SPEED
-        self.width = self.width // 8
-        self.height *= 2
+        self.change_x = ENEMY_SPEED
+        self.width = self.width * 1.25
 
     def update(self, delta_time):
-        # self.width += delta_time * self.expending_speed
+        super().update()
         self.animation_timer += delta_time
         if self.animation_timer >= self.animation_speed:
             self.animation_timer = 0
-            self.current_frame = (self.current_frame + 1) % 2
+            self.current_frame = (self.current_frame + 1) % 3
             self.texture = self.frames[self.current_frame]
 
 class Game(arcade.Window):
     def __init__(self, n=1, title="game"):
         super().__init__(get_screen_data("screenWidth"), get_screen_data("screenHeight"), title=title, fullscreen=True,
                          screen=SCREEN)
+        self.game_over = False
         arcade.set_background_color(arcade.color.PINK)
         self.player = None
         self.player_list = None
@@ -207,7 +208,7 @@ class Game(arcade.Window):
         self.player_list = arcade.SpriteList()
         self.player_list.append(self.player)
         self.bug_count = 0
-        self.wall_of_death = WallOfDeath(-100, 230)
+        self.wall_of_death = WallOfDeath(-700, 230)
         self.enemy_list = arcade.SpriteList()
         self.enemy_list.append(self.wall_of_death)
         self.player_camera = arcade.camera.Camera2D()
@@ -278,6 +279,8 @@ class Game(arcade.Window):
         self.gui_draw()
 
     def on_update(self, delta_time=1 / 60):
+        if self.game_over:
+             return
         base_speed = PLAYER_SPEED #new variable for speed(walking)
         if self.shift_pressed and self.player.stamina > 0:
             base_speed = SHIFT_SPEED # running
@@ -307,7 +310,7 @@ class Game(arcade.Window):
                 self.player.change_y = 0
         #jump
         is_on_ground = self.pp_eng.can_jump()
-        if is_on_ground:
+        if is_on_ground and self.player.live:
             if not self.player.was_on_ground:
                 self.player.jumps_remaining = self.player.max_jumps
                 self.player.was_on_ground = True
@@ -332,6 +335,7 @@ class Game(arcade.Window):
             self.player.change_x = 0
             self.player.center_x -= DASH_GAP
             self.dash_button = False
+
         self.pp_eng.update()
         pos = (self.player.center_x, self.player.center_y)
         self.player_camera.position = arcade.math.lerp_2d(self.player_camera.position,
@@ -381,6 +385,8 @@ class Game(arcade.Window):
                                                          gravity_constant=GRAVITY)
             self.player.center_x = 100
             self.player.center_y = 100
+            self.wall_of_death.center_x = -700
+            self.wall_of_death.center_y = 230
 
     def scores_and_results(self):
         pass
@@ -429,10 +435,10 @@ class Game(arcade.Window):
         pass
 
     def end_game(self):
-        arcade.close_window()
+        self.game_over = True
 
     def win_game(self):
-        arcade.close_window()
+        self.game_over = False
 
 
 def setup_game():
