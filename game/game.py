@@ -239,6 +239,7 @@ class Game(arcade.View):
             arcade.draw_lbwh_rectangle_filled(SCREEN_WIDTH - 70, 28, 95, 44, arcade.color.BLACK)
 
     def on_update(self, delta_time=1 / 60):
+        self.pp_eng.update()
         if self.left_pressed and not self.right_pressed:
             self.player.change_x = -PLAYER_SPEED
         elif self.right_pressed and not self.left_pressed:
@@ -299,7 +300,6 @@ class Game(arcade.View):
             self.player.change_x = 0
             self.player.center_x -= DASH_GAP
             self.dash_button = False
-        self.pp_eng.update()
         pos = (self.player.center_x, self.player.center_y)
         self.player_camera.position = arcade.math.lerp_2d(self.player_camera.position,
                                                           pos,
