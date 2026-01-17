@@ -80,3 +80,6 @@ class GameGUI(arcade.Window):
     def clear_file_and_close_event(self):
         cleaner(JSONPATH)
         arcade.close_window()
+
+    def on_close(self):
+        self.manager.disable()

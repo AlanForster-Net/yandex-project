@@ -54,3 +54,6 @@ class Dialog(arcade.Window):
 
     def setup_clicks(self):
         self.flat_button.on_click = lambda a: self.button_handler()
+
+    def on_close(self):
+        self.manager.disable()
