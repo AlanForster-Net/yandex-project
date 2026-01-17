@@ -2,6 +2,7 @@ import arcade
 from arcade.gui import UIManager, UIFlatButton, UITextureButton, UILabel
 from arcade.gui.widgets.layout import UIAnchorLayout, UIBoxLayout
 
+START_LEVEL = 5
 
 class GameGUI(arcade.View):
     def __init__(self, game, cleaner, endgame, window):
@@ -62,7 +63,7 @@ class GameGUI(arcade.View):
         self.manager.disable()
 
     def press_blue(self, junk):
-        view = self.Game(self.cleaner, GameGUI, self.endgame, self.window, 1)
+        view = self.Game(self.cleaner, GameGUI, self.endgame, self.window, START_LEVEL)
         view.setup()
         self.window.show_view(view)
 

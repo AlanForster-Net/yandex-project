@@ -4,11 +4,12 @@ from arcade.gui.widgets.layout import UIAnchorLayout, UIBoxLayout
 
 
 class EndGame(arcade.View):
-    def __init__(self, level_num, gamegui, game, cleaner, window):
+    def __init__(self, level_num, gamegui, game, cleaner, window, max_level):
         super().__init__()
         arcade.set_background_color((56, 56, 56))
         self.game = game
         self.cleaner = cleaner
+        self.max_level = max_level
         self.gamegui = gamegui
         self.window = window
         self.manager = UIManager()
@@ -35,16 +36,21 @@ class EndGame(arcade.View):
         self.box_layout.add(exit_btn)
 
     def setup_success_widgets(self):
-        end_title = UILabel(f'Уровень {self.level_num} пройден!\n      Поздравляем!',
-                            multiline=True, font_size=24,
-                            text_color=arcade.color.GREEN)
-        next_btn = UIFlatButton(text='Следующий уровень', width=250, height=50, color=arcade.color.BLACK)
+        if self.level_num < self.max_level:
+            end_title = UILabel(f'Уровень {self.level_num} пройден!\n      Поздравляем!',
+                                multiline=True, font_size=24,
+                                text_color=arcade.color.GREEN)
+            next_btn = UIFlatButton(text='Следующий уровень', width=250, height=50, color=arcade.color.BLACK)
+            next_btn.on_click = lambda a: self.next_lvl()
+            self.box_layout.add(next_btn)
+        else:
+            end_title = UILabel(f'Вы прошли игру!\n   Поздравляем!',
+                                multiline=True, font_size=24,
+                                text_color=arcade.color.GREEN)
         exit_btn = UIFlatButton(text='Сохранить прогресс и выйти', width=250, height=50, color=arcade.color.BLACK)
         exit_btn.on_click = lambda a: self.open_menu()
-        next_btn.on_click = lambda a: self.next_lvl()
         self.window.set_caption('Run from antivirus! — Уровень пройден!')
         self.box_layout.add(end_title)
-        self.box_layout.add(next_btn)
         self.box_layout.add(exit_btn)
 
     def on_draw(self):

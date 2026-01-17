@@ -381,10 +381,10 @@ class Game(arcade.View):
 
     def end_game(self):
         arcade.stop_sound(self.music_player)
-        view = self.endgame(-1, self.gamegui, Game, self.cleaner, self.window)
+        view = self.endgame(-1, self.gamegui, Game, self.cleaner, self.window, MAX_LEVEL)
         self.window.show_view(view)
 
     def win_game(self):
         arcade.stop_sound(self.music_player)
-        view = self.endgame(self.n, self.gamegui, Game, self.cleaner, self.window)
+        view = self.endgame(self.n, self.gamegui, Game, self.cleaner, self.window, MAX_LEVEL)
         self.window.show_view(view)
