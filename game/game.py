@@ -151,7 +151,7 @@ class WallOfDeath(arcade.Sprite):
         self.current_frame = 0
         self.animation_timer = 0
 
-        self.change_x = ENEMY_SPEED
+        self.change_x = 0
         self.width = self.width * 1.25
 
     def update(self, delta_time):
@@ -163,16 +163,16 @@ class WallOfDeath(arcade.Sprite):
             self.texture = self.frames[self.current_frame]
 
 class Game(arcade.Window):
-    def __init__(self, n=1, title="game"):
+    def __init__(self, level=1, title="game"):
         super().__init__(get_screen_data("screenWidth"), get_screen_data("screenHeight"), title=title, fullscreen=True,
                          screen=SCREEN)
         self.game_over = False
         arcade.set_background_color(arcade.color.PINK)
         self.player = None
         self.player_list = None
+        self.level = level
         self.background_color = arcade.color.BLACK
-        self.n = 1
-        self.tilemap = arcade.load_tilemap(f"resources/tile/tilemaps/tilemap{self.n}.tmx", scaling=TILE_SCALE)
+        self.tilemap = arcade.load_tilemap(f"resources/tile/tilemaps/tilemap{self.level}.tmx", scaling=TILE_SCALE)
         self.walls = arcade.SpriteList()
         self.collisions = arcade.SpriteList()
         self.traps = arcade.SpriteList()
@@ -220,9 +220,10 @@ class Game(arcade.Window):
         self.setup_players_database()
 
     def gui_draw(self):
+        #Stamina bar
         #Расчёт масштаба по экрану
         scale = self.width / SCREEN_WIDTH * 0.7
-        #Уменьшения скейла
+        #Уменьшения смещение влево
         left_shift = 50 * scale
         #Размеры подложки учитывая масштаб
         panel_width = int(305 * scale)
@@ -265,6 +266,26 @@ class Game(arcade.Window):
                 segment_height,
                 arcade.color.BLACK
             )
+        #timer
+        self.batch = Batch()
+        base_x = self.width
+        base_y = self.height
+        desired_offset = 20
+        text_x = int(base_x + (desired_offset * scale) - left_shift)
+        text_y = int(base_y - (desired_offset * scale))
+        font = int(10 * scale)
+        str_for_timer = (f'{self.timer_running // 60}:{self.timer_running % 60}')
+        text = arcade.Text(
+            str_for_timer,
+            text_x,
+            text_y,
+            arcade.color.WHITE,
+            font,
+            anchor_x="center",
+            anchor_y="center",
+            batch=self.batch
+        )
+        self.batch.draw()
 
     def on_draw(self):
         self.clear()
@@ -370,11 +391,11 @@ class Game(arcade.Window):
                 self.player.stamina = 3.0
 
     def next_level(self):
-        self.n += 1
-        if self.n > MAX_LEVEL:
+        self.level += 1
+        if self.level > MAX_LEVEL:
             self.win_game()
         else:
-            self.tilemap = arcade.load_tilemap(f"resources/tile/tilemaps/tilemap{self.n}.tmx", scaling=TILE_SCALE)
+            self.tilemap = arcade.load_tilemap(f"resources/tile/tilemaps/tilemap{self.level}.tmx", scaling=TILE_SCALE)
             self.walls = self.tilemap.sprite_lists["wall"]
             self.collisions = self.tilemap.sprite_lists["collision"]
             self.traps = self.tilemap.sprite_lists["trap"]
