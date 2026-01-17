@@ -159,7 +159,7 @@ class WallOfDeath(arcade.Sprite):
 
 
 class Game(arcade.Window):
-    def __init__(self, get_screen_data, run_end_screen, gamegui, n=1, title="game", level=1):
+    def __init__(self, get_screen_data, run_end_screen, cleaner, gamegui, n=1, title="game", level=1):
         self.get_screen_data = get_screen_data
         screen = arcade.get_screens()[self.get_screen_data("screenNum")]
         super().__init__(self.get_screen_data("screenWidth"), self.get_screen_data("screenHeight"),
@@ -167,6 +167,7 @@ class Game(arcade.Window):
                          screen=screen)
         arcade.set_background_color(arcade.color.PINK)
         self.run_end_screen = run_end_screen
+        self.cleaner = cleaner
         self.gamegui = gamegui
         self.MAX_LEVEL = level
         self.player = None
@@ -242,7 +243,6 @@ class Game(arcade.Window):
             arcade.draw_lbwh_rectangle_filled(SCREEN_WIDTH - 70, 28, 95, 44, arcade.color.BLACK)
 
     def on_update(self, delta_time=1 / 60):
-        self.pp_eng.update()
         if self.left_pressed and not self.right_pressed:
             self.player.change_x = -PLAYER_SPEED
         elif self.right_pressed and not self.left_pressed:
@@ -303,7 +303,7 @@ class Game(arcade.Window):
             self.player.change_x = 0
             self.player.center_x -= DASH_GAP
             self.dash_button = False
-
+        self.pp_eng.update()
         pos = (self.player.center_x, self.player.center_y)
         self.player_camera.position = arcade.math.lerp_2d(self.player_camera.position,
                                                           pos,
@@ -315,8 +315,6 @@ class Game(arcade.Window):
         #chacking for alive and here game will stop
         if dead_player:
             self.player.live = False
-            print("death")
-            self.run_end_screen(-1, self.get_screen_data, self.gamegui)
         c_bugs = arcade.check_for_collision_with_list(self.player, self.bugs)
         for bug in c_bugs:
             bug.remove_from_sprite_lists()
@@ -401,17 +399,7 @@ class Game(arcade.Window):
         pass
 
     def end_game(self):
-        arcade.close_window()
+        self.run_end_screen(-1, self.get_screen_data, self.gamegui, Game, self.cleaner)
 
     def win_game(self):
-        arcade.close_window()
-
-
-def setup_game():
-    win = Game()
-    win.setup()
-    arcade.run()
-
-
-if __name__ == "__main__":
-    setup_game()
+        self.run_end_screen(self.n, self.get_screen_data, self.gamegui, Game, self.cleaner)

@@ -5,7 +5,6 @@ import os
 JSONPATH = 'data/cfg.json'
 
 
-
 def generate():
     try:
         with open(JSONPATH, mode='r', encoding='utf-8') as f:

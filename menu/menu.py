@@ -69,7 +69,7 @@ class GameGUI(arcade.Window):
 
     def press_blue(self, junk):
         arcade.close_window()
-        win = self.Game(self.get_screen_data, self.run_end_screen, GameGUI, '1', level=3)
+        win = self.Game(self.get_screen_data, self.run_end_screen, self.cleaner, GameGUI, '1', level=3)
         win.setup()
         arcade.run()
 

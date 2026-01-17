@@ -6,17 +6,20 @@ from arcade.gui.widgets.layout import UIAnchorLayout, UIBoxLayout
 TITLE = 'Run from antivirus! — Game over'
 
 
-def run_end_screen(level, get_screen_data, gamegui):
-    _ = EndGame(level, get_screen_data, gamegui)
+def run_end_screen(level, get_screen_data, gamegui, game, cleaner):
+    _ = EndGame(level, get_screen_data, gamegui, game, cleaner)
     arcade.run()
 
 
 class EndGame(arcade.Window):
-    def __init__(self, level_num, get_screen_data, gamegui):
-        screen = arcade.get_screens()[get_screen_data('screenNum')]
-        super().__init__(get_screen_data("screenWidth"), get_screen_data("screenHeight"), title=TITLE,
+    def __init__(self, level_num, get_screen_data, gamegui, game, cleaner):
+        self.get_screen_data = get_screen_data
+        screen = arcade.get_screens()[self.get_screen_data('screenNum')]
+        super().__init__(self.get_screen_data("screenWidth"), self.get_screen_data("screenHeight"), title=TITLE,
                          fullscreen=True, screen=screen, center_window=False)
         arcade.set_background_color((56, 56, 56))
+        self.game = game
+        self.cleaner = cleaner
         self.gamegui = gamegui
         self.manager = UIManager()
         self.manager.enable()
@@ -59,6 +62,6 @@ class EndGame(arcade.Window):
 
     def open_menu(self):
         arcade.close_window()
-        _ = self.gamegui()
+        _ = self.gamegui(self.game, self.cleaner, self.get_screen_data, run_end_screen)
         arcade.run()
 
