@@ -1,17 +1,23 @@
 import arcade
 from arcade.gui import UIManager, UIFlatButton, UILabel
 from arcade.gui.widgets.layout import UIAnchorLayout, UIBoxLayout
-from handlers.screen_handler import get_screen_data
 
 
 TITLE = 'Run from antivirus! — Game over'
-SCREEN = arcade.get_screens()[get_screen_data('screenNum')]
+
+
+def run_end_screen(level, get_screen_data, gamegui):
+    _ = EndGame(level, get_screen_data, gamegui)
+    arcade.run()
+
 
 class EndGame(arcade.Window):
-    def __init__(self, level_num):
+    def __init__(self, level_num, get_screen_data, gamegui):
+        screen = arcade.get_screens()[get_screen_data('screenNum')]
         super().__init__(get_screen_data("screenWidth"), get_screen_data("screenHeight"), title=TITLE,
-                         fullscreen=True, screen=SCREEN, center_window=False)
+                         fullscreen=True, screen=screen, center_window=False)
         arcade.set_background_color((56, 56, 56))
+        self.gamegui = gamegui
         self.manager = UIManager()
         self.manager.enable()
         self.anchor_layout = UIAnchorLayout()
@@ -48,11 +54,11 @@ class EndGame(arcade.Window):
         self.clear()
         self.manager.draw()
 
-    def on_mouse_press(self, x, y, button, modifiers):
-        pass
-
     def on_close(self):
         self.manager.disable()
 
     def open_menu(self):
         arcade.close_window()
+        _ = self.gamegui()
+        arcade.run()
+

@@ -2,12 +2,9 @@ import arcade
 from handlers.json_handler import reader, generate
 
 
-JSONPATH = 'data/cfg.json'
-
-
 def check_screen():
-    generate(JSONPATH)
-    data = reader(JSONPATH)
+    generate()
+    data = reader()
     try:
         num = data["screenNum"]
         name_from_file = data["screenName"]
@@ -25,7 +22,7 @@ def check_screen():
 
 def get_screen_data(typ):
     try:
-        data = reader(JSONPATH)
+        data = reader()
         return data[typ]
     except KeyError:
         return 0

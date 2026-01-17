@@ -1,16 +1,12 @@
 import arcade
-import sqlite3
-
 from arcade.examples.camera_platform import JUMP_SPEED
 from pyglet.graphics import Batch
 from arcade.experimental.query_demo import SCREEN_HEIGHT, SCREEN_WIDTH
 from pyglet.event import EVENT_HANDLE_STATE
-from handlers.screen_handler import get_screen_data
 
 
 # Constants
 TITLE = "Run from antivirus! — Level 1"
-SCREEN = arcade.get_screens()[get_screen_data("screenNum")]
 
 # Player const
 PLAYER_SPEED = 1.5
@@ -27,7 +23,6 @@ STAMINA_USING_VALUE = 1.0
 ENEMY_SPEED = 150
 # Physic const
 GRAVITY = 0.8
-MAX_LEVEL = 5
 TILE_SCALE = 2.5
 
 
@@ -162,11 +157,18 @@ class WallOfDeath(arcade.Sprite):
             self.current_frame = (self.current_frame + 1) % 2
             self.texture = self.frames[self.current_frame]
 
+
 class Game(arcade.Window):
-    def __init__(self, n=1, title="game"):
-        super().__init__(get_screen_data("screenWidth"), get_screen_data("screenHeight"), title=title, fullscreen=True,
-                         screen=SCREEN)
+    def __init__(self, get_screen_data, run_end_screen, gamegui, n=1, title="game", level=1):
+        self.get_screen_data = get_screen_data
+        screen = arcade.get_screens()[self.get_screen_data("screenNum")]
+        super().__init__(self.get_screen_data("screenWidth"), self.get_screen_data("screenHeight"),
+                         title=title, fullscreen=True,
+                         screen=screen)
         arcade.set_background_color(arcade.color.PINK)
+        self.run_end_screen = run_end_screen
+        self.gamegui = gamegui
+        self.MAX_LEVEL = level
         self.player = None
         self.player_list = None
         self.background_color = arcade.color.BLACK
@@ -313,7 +315,8 @@ class Game(arcade.Window):
         #chacking for alive and here game will stop
         if dead_player:
             self.player.live = False
-            self.end_game()
+            print("death")
+            self.run_end_screen(-1, self.get_screen_data, self.gamegui)
         c_bugs = arcade.check_for_collision_with_list(self.player, self.bugs)
         for bug in c_bugs:
             bug.remove_from_sprite_lists()
@@ -336,7 +339,7 @@ class Game(arcade.Window):
 
     def next_level(self):
         self.n += 1
-        if self.n > MAX_LEVEL:
+        if self.n > self.MAX_LEVEL:
             self.win_game()
         else:
             self.tilemap = arcade.load_tilemap(f"resources/tile/tilemaps/tilemap{self.n}.tmx", scaling=TILE_SCALE)

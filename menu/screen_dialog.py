@@ -1,17 +1,15 @@
 import arcade
 from arcade.gui import UIManager, UIDropdown, UIFlatButton
 from arcade.gui.widgets.layout import UIAnchorLayout, UIBoxLayout
-from handlers.json_handler import writer
 
 
-JSONPATH = 'data/cfg.json'
 TITLE = "Выберите экран для запуска"
 SCREEN_HEIGHT = 200
 SCREEN_WIDTH = 400
 
 
-def run_dialog():
-    _ = Dialog()
+def run_dialog(writer):
+    _ = Dialog(writer)
     arcade.run()
 
 
@@ -23,9 +21,11 @@ def get_sc():
 
 
 class Dialog(arcade.Window):
-    def __init__(self):
+    def __init__(self, writer):
         super().__init__(SCREEN_WIDTH, SCREEN_HEIGHT, title=TITLE, fullscreen=False)
+        self.dropdown = None
         self.flat_button = None
+        self.writer = writer
         arcade.set_background_color(arcade.color.WHITE)
         self.manager = UIManager()
         self.manager.enable()
@@ -38,7 +38,7 @@ class Dialog(arcade.Window):
 
     def button_handler(self):
         current = int(self.dropdown.value.split(".")[0]) - 1
-        writer(JSONPATH, arcade.get_screens()[current], current)
+        self.writer(arcade.get_screens()[current], current)
         arcade.close_window()
 
     def setup_widgets(self):
