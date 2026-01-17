@@ -3,24 +3,14 @@ from arcade.gui import UIManager, UIFlatButton, UILabel
 from arcade.gui.widgets.layout import UIAnchorLayout, UIBoxLayout
 
 
-TITLE = 'Run from antivirus! — Game over'
-
-
-def run_end_screen(level, get_screen_data, gamegui, game, cleaner):
-    _ = EndGame(level, get_screen_data, gamegui, game, cleaner)
-    arcade.run()
-
-
-class EndGame(arcade.Window):
-    def __init__(self, level_num, get_screen_data, gamegui, game, cleaner):
-        self.get_screen_data = get_screen_data
-        screen = arcade.get_screens()[self.get_screen_data('screenNum')]
-        super().__init__(self.get_screen_data("screenWidth"), self.get_screen_data("screenHeight"), title=TITLE,
-                         fullscreen=True, screen=screen, center_window=False)
+class EndGame(arcade.View):
+    def __init__(self, level_num, gamegui, game, cleaner, window):
+        super().__init__()
         arcade.set_background_color((56, 56, 56))
         self.game = game
         self.cleaner = cleaner
         self.gamegui = gamegui
+        self.window = window
         self.manager = UIManager()
         self.manager.enable()
         self.level_num = level_num
@@ -35,10 +25,11 @@ class EndGame(arcade.Window):
 
     def setup_fail_widgets(self):
         end_title = UILabel('    Game over!\nИгра окончена!', multiline=True, font_size=24,
-                            text_color=arcade.color.DARK_RED)
-        retry_btn = UIFlatButton(text='Еще раз', width=200, height=50, color=arcade.color.BLACK)
-        exit_btn = UIFlatButton(text='Сохранить прогресс и выйти', width=200, height=50, color=arcade.color.BLACK)
+                            text_color=arcade.color.RED)
+        retry_btn = UIFlatButton(text='Еще раз', width=250, height=50, color=arcade.color.BLACK)
+        exit_btn = UIFlatButton(text='Сохранить прогресс и выйти', width=250, height=50, color=arcade.color.BLACK)
         exit_btn.on_click = lambda a: self.open_menu()
+        self.window.set_caption('Run from antivirus! — Конец игры')
         self.box_layout.add(end_title)
         self.box_layout.add(retry_btn)
         self.box_layout.add(exit_btn)
@@ -47,10 +38,11 @@ class EndGame(arcade.Window):
         end_title = UILabel(f'Уровень {self.level_num} пройден!\n      Поздравляем!',
                             multiline=True, font_size=24,
                             text_color=arcade.color.GREEN)
-        next_btn = UIFlatButton(text='Следующий уровень', width=200, height=50, color=arcade.color.BLACK)
-        exit_btn = UIFlatButton(text='Сохранить прогресс и выйти', width=200, height=50, color=arcade.color.BLACK)
+        next_btn = UIFlatButton(text='Следующий уровень', width=250, height=50, color=arcade.color.BLACK)
+        exit_btn = UIFlatButton(text='Сохранить прогресс и выйти', width=250, height=50, color=arcade.color.BLACK)
         exit_btn.on_click = lambda a: self.open_menu()
         next_btn.on_click = lambda a: self.next_lvl()
+        self.window.set_caption('Run from antivirus! — Уровень пройден!')
         self.box_layout.add(end_title)
         self.box_layout.add(next_btn)
         self.box_layout.add(exit_btn)
@@ -63,13 +55,13 @@ class EndGame(arcade.Window):
         self.manager.disable()
 
     def open_menu(self):
-        arcade.close_window()
-        _ = self.gamegui(self.game, self.cleaner, self.get_screen_data, run_end_screen)
-        # arcade.run()
+        view = self.gamegui(self.game, self.cleaner, EndGame, self.window)
+        self.window.show_view(view)
 
     def next_lvl(self):
-        arcade.close_window()
-        print(self.level_num + 1)
-        _ = self.game(self.get_screen_data, run_end_screen, self.cleaner, self.gamegui, n=(self.level_num + 1))
-        arcade.run()
+        view = self.game(self.cleaner, self.gamegui, EndGame, self.window, self.level_num + 1)
+        view.setup()
+        self.window.show_view(view)
+
+
 

@@ -3,16 +3,6 @@ from arcade.gui import UIManager, UIDropdown, UIFlatButton
 from arcade.gui.widgets.layout import UIAnchorLayout, UIBoxLayout
 
 
-TITLE = "Выберите экран для запуска"
-SCREEN_HEIGHT = 200
-SCREEN_WIDTH = 400
-
-
-def run_dialog(writer):
-    _ = Dialog(writer)
-    arcade.run()
-
-
 def get_sc():
     ans = []
     for x in enumerate(arcade.get_screens()):
@@ -20,12 +10,21 @@ def get_sc():
     return ans
 
 
-class Dialog(arcade.Window):
-    def __init__(self, writer):
-        super().__init__(SCREEN_WIDTH, SCREEN_HEIGHT, title=TITLE, fullscreen=False)
+def run_dialog(writer):
+    window = arcade.Window(width=400, height=200, fullscreen=False)
+    window.set_caption("Выберите экран для запуска")
+    view = Dialog(writer, window)
+    window.show_view(view)
+    arcade.run()
+
+
+class Dialog(arcade.View):
+    def __init__(self, writer, window):
+        super().__init__()
         self.dropdown = None
         self.flat_button = None
         self.writer = writer
+        self.window = window
         arcade.set_background_color(arcade.color.WHITE)
         self.manager = UIManager()
         self.manager.enable()
@@ -39,7 +38,8 @@ class Dialog(arcade.Window):
     def button_handler(self):
         current = int(self.dropdown.value.split(".")[0]) - 1
         self.writer(arcade.get_screens()[current], current)
-        arcade.close_window()
+        self.manager.disable()
+        self.window.close()
 
     def setup_widgets(self):
         screens = get_sc()
@@ -54,6 +54,3 @@ class Dialog(arcade.Window):
 
     def setup_clicks(self):
         self.flat_button.on_click = lambda a: self.button_handler()
-
-    def on_close(self):
-        self.manager.disable()

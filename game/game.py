@@ -156,18 +156,16 @@ class WallOfDeath(arcade.Sprite):
             self.texture = self.frames[self.current_frame]
 
 
-class Game(arcade.Window):
-    def __init__(self, get_screen_data, run_end_screen, cleaner, gamegui, n=1):
-        self.get_screen_data = get_screen_data
-        screen = arcade.get_screens()[self.get_screen_data("screenNum")]
+class Game(arcade.View):
+    def __init__(self, cleaner, gamegui, endgame, window, n=1):
         title = f"Run from antivirus! — Level {n}"
-        super().__init__(self.get_screen_data("screenWidth"), self.get_screen_data("screenHeight"),
-                         title=title, fullscreen=True,
-                         screen=screen)
+        super().__init__()
         arcade.set_background_color(arcade.color.PINK)
-        self.run_end_screen = run_end_screen
         self.cleaner = cleaner
+        self.endgame = endgame
         self.gamegui = gamegui
+        self.window = window
+        self.window.set_caption(title)
         self.player = None
         self.player_list = None
         self.background_color = arcade.color.BLACK
@@ -381,10 +379,10 @@ class Game(arcade.Window):
 
     def end_game(self):
         arcade.stop_sound(self.music_player)
-        arcade.close_window()
-        self.run_end_screen(-1, self.get_screen_data, self.gamegui, Game, self.cleaner)
+        view = self.endgame(-1, self.gamegui, Game, self.cleaner, self.window)
+        self.window.show_view(view)
 
     def win_game(self):
         arcade.stop_sound(self.music_player)
-        arcade.close_window()
-        self.run_end_screen(self.n, self.get_screen_data, self.gamegui, Game, self.cleaner)
+        view = self.endgame(self.n, self.gamegui, Game, self.cleaner, self.window)
+        self.window.show_view(view)

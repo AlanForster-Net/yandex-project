@@ -3,20 +3,13 @@ from arcade.gui import UIManager, UIFlatButton, UITextureButton, UILabel
 from arcade.gui.widgets.layout import UIAnchorLayout, UIBoxLayout
 
 
-TITLE = "Run from antivirus! — Idle"
-
-
-class GameGUI(arcade.Window):
-    def __init__(self, game, cleaner, get_screen_data, run_end_screen):
-        self.get_screen_data = get_screen_data
-        screen = arcade.get_screens()[self.get_screen_data("screenNum")]
-        super().__init__(self.get_screen_data("screenWidth"), self.get_screen_data("screenHeight"), title=TITLE,
-                         fullscreen=False, screen=screen, center_window=False)
-        # self.set_location(0, 108)
-        self.run_end_screen = run_end_screen
+class GameGUI(arcade.View):
+    def __init__(self, game, cleaner, endgame, window):
+        super().__init__()
         self.Game = game
+        self.window = window
         self.cleaner = cleaner
-        self.set_fullscreen()
+        self.endgame = endgame
         arcade.set_background_color(arcade.color.GRAY)
         self.manager = UIManager()
         self.manager.enable()
@@ -25,6 +18,7 @@ class GameGUI(arcade.Window):
         self.setup_widgets()
         self.anchor_layout.add(self.box_layout)
         self.manager.add(self.anchor_layout)
+        self.window.set_fullscreen(True)
 
     def setup_widgets(self):
         label = UILabel(text="Run from antivirus!",
@@ -68,10 +62,9 @@ class GameGUI(arcade.Window):
         self.manager.disable()
 
     def press_blue(self, junk):
-        arcade.close_window()
-        win = self.Game(self.get_screen_data, self.run_end_screen, self.cleaner, GameGUI, 1)
-        win.setup()
-        arcade.run()
+        view = self.Game(self.cleaner, GameGUI, self.endgame, self.window, 1)
+        view.setup()
+        self.window.show_view(view)
 
     def clear_file_and_close_event(self):
         self.cleaner()
