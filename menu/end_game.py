@@ -23,12 +23,13 @@ class EndGame(arcade.Window):
         self.gamegui = gamegui
         self.manager = UIManager()
         self.manager.enable()
+        self.level_num = level_num
         self.anchor_layout = UIAnchorLayout()
         self.box_layout = UIBoxLayout(vertical=True, space_between=10)
         if level_num < 1:
             self.setup_fail_widgets()
         else:
-            self.setup_success_widgets(level_num)
+            self.setup_success_widgets()
         self.anchor_layout.add(self.box_layout)
         self.manager.add(self.anchor_layout)
 
@@ -36,19 +37,20 @@ class EndGame(arcade.Window):
         end_title = UILabel('    Game over!\nИгра окончена!', multiline=True, font_size=24,
                             text_color=arcade.color.DARK_RED)
         retry_btn = UIFlatButton(text='Еще раз', width=200, height=50, color=arcade.color.BLACK)
-        exit_btn = UIFlatButton(text='В меню', width=200, height=50, color=arcade.color.BLACK)
+        exit_btn = UIFlatButton(text='Сохранить прогресс и выйти', width=200, height=50, color=arcade.color.BLACK)
         exit_btn.on_click = lambda a: self.open_menu()
         self.box_layout.add(end_title)
         self.box_layout.add(retry_btn)
         self.box_layout.add(exit_btn)
 
-    def setup_success_widgets(self, level_num):
-        end_title = UILabel(f'Уровень {level_num} пройден!\n      Поздравляем!',
+    def setup_success_widgets(self):
+        end_title = UILabel(f'Уровень {self.level_num} пройден!\n      Поздравляем!',
                             multiline=True, font_size=24,
-                            text_color=arcade.color.DARK_GREEN)
+                            text_color=arcade.color.GREEN)
         next_btn = UIFlatButton(text='Следующий уровень', width=200, height=50, color=arcade.color.BLACK)
-        exit_btn = UIFlatButton(text='В меню', width=200, height=50, color=arcade.color.BLACK)
+        exit_btn = UIFlatButton(text='Сохранить прогресс и выйти', width=200, height=50, color=arcade.color.BLACK)
         exit_btn.on_click = lambda a: self.open_menu()
+        next_btn.on_click = lambda a: self.next_lvl()
         self.box_layout.add(end_title)
         self.box_layout.add(next_btn)
         self.box_layout.add(exit_btn)
@@ -63,5 +65,11 @@ class EndGame(arcade.Window):
     def open_menu(self):
         arcade.close_window()
         _ = self.gamegui(self.game, self.cleaner, self.get_screen_data, run_end_screen)
+        # arcade.run()
+
+    def next_lvl(self):
+        arcade.close_window()
+        print(self.level_num + 1)
+        _ = self.game(self.get_screen_data, run_end_screen, self.cleaner, self.gamegui, n=(self.level_num + 1))
         arcade.run()
 

@@ -10,7 +10,7 @@ from game.game import Game
 
 def run():
     if check_screen():
-        run_dialog(writer)
+        window = arcade.Window()
     _ = GameGUI(Game, cleaner, get_screen_data, run_end_screen)
     arcade.run()
 
