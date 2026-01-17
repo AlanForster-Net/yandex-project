@@ -338,7 +338,9 @@ class Game(arcade.View):
         if key == arcade.key.BACKSPACE:
             self.win_game()
         if key == arcade.key.ESCAPE:
-            arcade.close_window()
+            arcade.stop_sound(self.music_player)
+            view = self.gamegui(Game, self.cleaner, self.endgame, self.window)
+            self.window.show_view(view)
         if key == arcade.key.D:
             self.right_pressed = True
         if key == arcade.key.A:
