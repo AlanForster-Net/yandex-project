@@ -65,7 +65,7 @@ class GameGUI(arcade.Window):
 
     def press_blue(self, junk):
         check_screen()
-        win = Game('1')
+        win = Game(1)
         win.setup()
         arcade.run()
         arcade.close_window()

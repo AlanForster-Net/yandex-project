@@ -151,7 +151,7 @@ class WallOfDeath(arcade.Sprite):
         self.current_frame = 0
         self.animation_timer = 0
 
-        self.change_x = 0
+        # self.change_x = ENEMY_SPEED
         self.width = self.width * 1.25
 
     def update(self, delta_time):
@@ -371,6 +371,8 @@ class Game(arcade.Window):
             self.player.live = False
             self.end_game()
         c_bugs = arcade.check_for_collision_with_list(self.player, self.bugs)
+        c_bug_2 = arcade.check_for_collision_with_list(self.wall_of_death, self.bugs)
+        c_bugs += c_bug_2
         for bug in c_bugs:
             bug.remove_from_sprite_lists()
             self.bug_count += 1
@@ -406,8 +408,14 @@ class Game(arcade.Window):
                                                          gravity_constant=GRAVITY)
             self.player.center_x = 100
             self.player.center_y = 100
-            self.wall_of_death.center_x = -700
-            self.wall_of_death.center_y = 230
+
+            if self.level == 5:
+                self.wall_of_death.center_x = -1200
+                self.wall_of_death.center_y = 400
+                self.wall_of_death.height = self.wall_of_death.height * 2
+            else:
+                self.wall_of_death.center_x = -900
+                self.wall_of_death.center_y = 200
 
     def scores_and_results(self):
         pass
