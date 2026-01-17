@@ -1,22 +1,16 @@
 import arcade
-import sqlite3
-
 from arcade.examples.camera_platform import JUMP_SPEED
 from pyglet.graphics import Batch
 from arcade.experimental.query_demo import SCREEN_HEIGHT, SCREEN_WIDTH
 from pyglet.event import EVENT_HANDLE_STATE
-from handlers.screen_handler import get_screen_data
 
-
-# Constants
-TITLE = "Run from antivirus! — Level 1"
-SCREEN = arcade.get_screens()[get_screen_data("screenNum")]
 
 # Player const
 PLAYER_SPEED = 1.5
 LADDER_SPEED = 2
 JUMP_SPEED = 10
 MAX_JUMPS = 2
+MAX_LEVEL = 5
 DASH_GAP = 60
 SHIFT_SPEED = 3
 SPEED_OF_USING_STAMINA = 0.2
@@ -27,7 +21,6 @@ STAMINA_USING_VALUE = 1.0
 ENEMY_SPEED = 150
 # Physic const
 GRAVITY = 0.8
-MAX_LEVEL = 5
 TILE_SCALE = 2.5
 
 
@@ -162,15 +155,21 @@ class WallOfDeath(arcade.Sprite):
             self.current_frame = (self.current_frame + 1) % 2
             self.texture = self.frames[self.current_frame]
 
-class Game(arcade.Window):
-    def __init__(self, n=1, title="game"):
-        super().__init__(get_screen_data("screenWidth"), get_screen_data("screenHeight"), title=title, fullscreen=True,
-                         screen=SCREEN)
+
+class Game(arcade.View):
+    def __init__(self, cleaner, gamegui, endgame, window, n=1):
+        title = f"Run from antivirus! — Level {n}"
+        super().__init__()
         arcade.set_background_color(arcade.color.PINK)
+        self.cleaner = cleaner
+        self.endgame = endgame
+        self.gamegui = gamegui
+        self.window = window
+        self.window.set_caption(title)
         self.player = None
         self.player_list = None
         self.background_color = arcade.color.BLACK
-        self.n = 1
+        self.n = n
         self.tilemap = arcade.load_tilemap(f"resources/tile/tilemaps/tilemap{self.n}.tmx", scaling=TILE_SCALE)
         self.walls = arcade.SpriteList()
         self.collisions = arcade.SpriteList()
@@ -240,7 +239,6 @@ class Game(arcade.Window):
             arcade.draw_lbwh_rectangle_filled(SCREEN_WIDTH - 70, 28, 95, 44, arcade.color.BLACK)
 
     def on_update(self, delta_time=1 / 60):
-        self.pp_eng.update()
         if self.left_pressed and not self.right_pressed:
             self.player.change_x = -PLAYER_SPEED
         elif self.right_pressed and not self.left_pressed:
@@ -301,7 +299,7 @@ class Game(arcade.Window):
             self.player.change_x = 0
             self.player.center_x -= DASH_GAP
             self.dash_button = False
-
+        self.pp_eng.update()
         pos = (self.player.center_x, self.player.center_y)
         self.player_camera.position = arcade.math.lerp_2d(self.player_camera.position,
                                                           pos,
@@ -313,7 +311,6 @@ class Game(arcade.Window):
         #chacking for alive and here game will stop
         if dead_player:
             self.player.live = False
-            self.end_game()
         c_bugs = arcade.check_for_collision_with_list(self.player, self.bugs)
         for bug in c_bugs:
             bug.remove_from_sprite_lists()
@@ -325,7 +322,7 @@ class Game(arcade.Window):
         if len(arcade.check_for_collision_with_list(self.player, self.end)) != 0:
             self.scores_and_results()
             self.write_data_in_database()
-            self.next_level()
+            self.win_game()
 
     def update_timer(self, delta_time):
         self.timer_running += 1
@@ -334,29 +331,12 @@ class Game(arcade.Window):
             if self.player.stamina > 3.0:
                 self.player.stamina = 3.0
 
-    def next_level(self):
-        self.n += 1
-        if self.n > MAX_LEVEL:
-            self.win_game()
-        else:
-            self.tilemap = arcade.load_tilemap(f"resources/tile/tilemaps/tilemap{self.n}.tmx", scaling=TILE_SCALE)
-            self.walls = self.tilemap.sprite_lists["wall"]
-            self.collisions = self.tilemap.sprite_lists["collision"]
-            self.traps = self.tilemap.sprite_lists["trap"]
-            self.bugs = self.tilemap.sprite_lists["bug"]
-            self.end = self.tilemap.sprite_lists["end"]
-            self.pp_eng = arcade.PhysicsEnginePlatformer(player_sprite=self.player,
-                                                         platforms=self.collisions,
-                                                         gravity_constant=GRAVITY)
-            self.player.center_x = 100
-            self.player.center_y = 100
-
     def scores_and_results(self):
         pass
 
     def on_key_press(self, key, modifiers):
         if key == arcade.key.BACKSPACE:
-            self.next_level()
+            self.win_game()
         if key == arcade.key.ESCAPE:
             arcade.close_window()
         if key == arcade.key.D:
@@ -398,17 +378,11 @@ class Game(arcade.Window):
         pass
 
     def end_game(self):
-        arcade.close_window()
+        arcade.stop_sound(self.music_player)
+        view = self.endgame(-1, self.gamegui, Game, self.cleaner, self.window)
+        self.window.show_view(view)
 
     def win_game(self):
-        arcade.close_window()
-
-
-def setup_game():
-    win = Game()
-    win.setup()
-    arcade.run()
-
-
-if __name__ == "__main__":
-    setup_game()
+        arcade.stop_sound(self.music_player)
+        view = self.endgame(self.n, self.gamegui, Game, self.cleaner, self.window)
+        self.window.show_view(view)

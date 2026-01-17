@@ -1,23 +1,15 @@
 import arcade
 from arcade.gui import UIManager, UIFlatButton, UITextureButton, UILabel
 from arcade.gui.widgets.layout import UIAnchorLayout, UIBoxLayout
-from pyglet.event import EVENT_HANDLE_STATE
-
-from game.game import Game
-from handlers.screen_handler import check_screen, get_screen_data, JSONPATH
-from handlers.json_handler import cleaner
 
 
-TITLE = "Run from antivirus! — Idle"
-SCREEN = arcade.get_screens()[get_screen_data("screenNum")]
-
-
-class GameGUI(arcade.Window):
-    def __init__(self):
-        super().__init__(get_screen_data("screenWidth"), get_screen_data("screenHeight"), title=TITLE,
-                         fullscreen=False, screen=SCREEN, center_window=False)
-        self.set_location(0, 108)
-        self.set_fullscreen()
+class GameGUI(arcade.View):
+    def __init__(self, game, cleaner, endgame, window):
+        super().__init__()
+        self.Game = game
+        self.window = window
+        self.cleaner = cleaner
+        self.endgame = endgame
         arcade.set_background_color(arcade.color.GRAY)
         self.manager = UIManager()
         self.manager.enable()
@@ -26,6 +18,7 @@ class GameGUI(arcade.Window):
         self.setup_widgets()
         self.anchor_layout.add(self.box_layout)
         self.manager.add(self.anchor_layout)
+        self.window.set_fullscreen(True)
 
     def setup_widgets(self):
         label = UILabel(text="Run from antivirus!",
@@ -56,27 +49,24 @@ class GameGUI(arcade.Window):
         exit_with_open.on_click = lambda a: self.clear_file_and_close_event()
         self.box_layout.add(exit_with_open)
 
-
-
     def on_draw(self):
         self.clear()
         self.manager.draw()
-        pass
-
-    def press_blue(self, junk):
-        check_screen()
-        win = Game('1')
-        win.setup()
-        arcade.run()
-        arcade.close_window()
-
-    def on_mouse_press(self, x, y, button, modifiers):
         pass
 
     def on_key_press(self, key, modifiers):
         if key == arcade.key.ESCAPE:
             arcade.close_window()
 
+    def on_close(self):
+        self.manager.disable()
+
+    def press_blue(self, junk):
+        view = self.Game(self.cleaner, GameGUI, self.endgame, self.window, 1)
+        view.setup()
+        self.window.show_view(view)
+
     def clear_file_and_close_event(self):
-        cleaner(JSONPATH)
+        self.cleaner()
         arcade.close_window()
+
