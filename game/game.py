@@ -139,7 +139,7 @@ class Player(arcade.Sprite):
             self.frames["running_left"].append(arcade.load_texture(f"resources/players_frames/pack{pack_of_skin}/run_l_{i}.png"))
 
 class WallOfDeath(arcade.Sprite):
-    def __init__(self, x, y, scale=1.25):
+    def __init__(self, x, y, scale=1.95):
         super().__init__('resources/enemy_frames/death_wall(1).png', scale=scale)
         self.center_x = x
         self.center_y = y
@@ -151,7 +151,8 @@ class WallOfDeath(arcade.Sprite):
         self.current_frame = 0
         self.animation_timer = 0
 
-        # self.change_x = ENEMY_SPEED
+        self.change_x = ENEMY_SPEED
+        self.height = self.height * 1.25
         self.width = self.width * 1.25
 
     def update(self, delta_time):
@@ -410,11 +411,24 @@ class Game(arcade.Window):
             self.player.center_y = 100
 
             if self.level == 5:
-                self.wall_of_death.center_x = -1200
+                self.wall_of_death.center_x = -1400
                 self.wall_of_death.center_y = 400
-                self.wall_of_death.height = self.wall_of_death.height * 2
+                self.wall_of_death.change_x *= ENEMY_SPEED * 0.75
+            elif self.level == 4:
+                self.wall_of_death.change_x *= ENEMY_SPEED * 1
+                self.wall_of_death.change_x *= ENEMY_SPEED * 1.75
+                self.wall_of_death.center_x = -1100
+                self.wall_of_death.center_y = 200
+            elif self.level == 3:
+                self.wall_of_death.change_x *= ENEMY_SPEED * 1.5
+                self.wall_of_death.center_x = -1100
+                self.wall_of_death.center_y = 200
+            elif self.level == 2:
+                self.wall_of_death.change_x *= ENEMY_SPEED * 1.25
+                self.wall_of_death.center_x = -1100
+                self.wall_of_death.center_y = 200
             else:
-                self.wall_of_death.center_x = -900
+                self.wall_of_death.center_x = -1100
                 self.wall_of_death.center_y = 200
 
     def scores_and_results(self):
