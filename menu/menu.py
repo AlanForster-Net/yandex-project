@@ -1,24 +1,19 @@
 import arcade
-from arcade.gui import UIManager, UIFlatButton, UITextureButton, UILabel
+from arcade.gui import UIManager, UIFlatButton, UIImage, UILabel
 from arcade.gui.widgets.layout import UIAnchorLayout, UIBoxLayout
-from pyglet.event import EVENT_HANDLE_STATE
 
-from game.game import Game
-from handlers.screen_handler import check_screen, get_screen_data, JSONPATH
-from handlers.json_handler import cleaner
-
-
-TITLE = "Run from antivirus! — Idle"
-SCREEN = arcade.get_screens()[get_screen_data("screenNum")]
-
-
-class GameGUI(arcade.Window):
-    def __init__(self):
-        super().__init__(get_screen_data("screenWidth"), get_screen_data("screenHeight"), title=TITLE,
-                         fullscreen=False, screen=SCREEN, center_window=False)
-        self.set_location(0, 108)
-        self.set_fullscreen()
-        arcade.set_background_color(arcade.color.GRAY)
+class GameGUI(arcade.View):
+    def __init__(self, game, cleaner, endgame, window, icon, bd_handler, statistics):
+        super().__init__()
+        self.Game = game
+        self.window = window
+        self.cleaner = cleaner
+        self.endgame = endgame
+        self.bd_handler = bd_handler
+        self.icon = icon
+        self.statistics = statistics
+        self.start_level = bd_handler.get_stats('cur_lvl')
+        arcade.set_background_color((56, 56, 56))
         self.manager = UIManager()
         self.manager.enable()
         self.anchor_layout = UIAnchorLayout()
@@ -26,36 +21,47 @@ class GameGUI(arcade.Window):
         self.setup_widgets()
         self.anchor_layout.add(self.box_layout)
         self.manager.add(self.anchor_layout)
+        self.window.set_caption("Run from antivirus! — Idle")
+        self.window.set_fullscreen(True)
 
     def setup_widgets(self):
-        label = UILabel(text="Run from antivirus!",
-                        font_size=20,
-                        text_color=arcade.color.WHITE,
+        btn_style = {
+            "normal": UIFlatButton.UIStyle(
+                font_size=18,
+                bg=(213, 0, 97, 255)
+            ),
+            "hover": UIFlatButton.UIStyle(
+                font_size=18,
+                bg=(192, 0, 87, 255)
+            ),
+            "press": UIFlatButton.UIStyle(
+                font_size=18,
+                bg=(172, 0, 63, 255)
+            )
+        }
+        game_name = UILabel(text="Run from antivirus!",
+                        font_size=50,
+                        text_color=(237, 0, 108),
                         width=300,
                         align="center")
-        self.box_layout.add(label)
-        flat_button = UIFlatButton(text="Плоская Кнопка", width=200, height=50, color=arcade.color.BLUE)
-        flat_button.on_click = self.press_blue
-        texture_normal = arcade.load_texture("resources/img/заглушка3.png")
-        texture_button = UITextureButton(texture=texture_normal,
-                                         texture_hovered=texture_normal,
-                                         texture_pressed=texture_normal,
-                                         scale=0.05)
-        self.box_layout.add(texture_button)
-        texture_normal1 = arcade.load_texture(":resources:/gui_basic_assets/button/red_normal.png")
-        texture_hovered1 = arcade.load_texture(":resources:/gui_basic_assets/button/red_hover.png")
-        texture_pressed1= arcade.load_texture(":resources:/gui_basic_assets/button/red_press.png")
-        texture_button1 = UITextureButton(texture=texture_normal1,
-                                         texture_hovered=texture_hovered1,
-                                         texture_pressed=texture_pressed1,
-                                         scale=1.0)
-        self.box_layout.add(texture_button1)
-        self.box_layout.add(flat_button)
-        exit_with_open = UIFlatButton(text="Выйти из игры (с выбором монитора)",
-                                   width=325, height=50, color=arcade.color.BLUE)
+        logo = arcade.texture.load_texture(self.icon)
+        logo = UIImage(texture=logo, width=200, height=200, alpha=255)
+        name_layout = UIBoxLayout(vertical=False, space_between=20)
+        start_game_btn = UIFlatButton(text="Начать игру", width=500, height=50, style=btn_style)
+        start_game_btn.on_click = self.start_game
+        stat_btn = UIFlatButton(text="Статистика", width=500, height=50, style=btn_style)
+        stat_btn.on_click = lambda a: self.open_stat_win()
+        exit_with_open = UIFlatButton(text="Выйти из игры (с выбором монитора)", width=500, height=50, style=btn_style)
         exit_with_open.on_click = lambda a: self.clear_file_and_close_event()
+        exit_btn = UIFlatButton(text="Выйти из игры", width=500, height=50, style=btn_style)
+        exit_btn.on_click = lambda a: arcade.close_window()
+        name_layout.add(logo)
+        name_layout.add(game_name)
+        self.box_layout.add(name_layout)
+        self.box_layout.add(start_game_btn)
+        self.box_layout.add(stat_btn)
         self.box_layout.add(exit_with_open)
-
+        self.box_layout.add(exit_btn)
 
 
     def on_draw(self):
@@ -63,20 +69,21 @@ class GameGUI(arcade.Window):
         self.manager.draw()
         pass
 
-    def press_blue(self, junk):
-        check_screen()
-        win = Game(1)
-        win.setup()
-        arcade.run()
-        arcade.close_window()
+    def on_close(self):
+        self.manager.disable()
 
-    def on_mouse_press(self, x, y, button, modifiers):
-        pass
+    def start_game(self, junk):
+        view = self.Game(self.cleaner, GameGUI, self.endgame, self.window, self.icon, self.bd_handler,
+                         self.statistics, self.start_level)
+        view.setup()
+        self.window.show_view(view)
 
-    def on_key_press(self, key, modifiers):
-        if key == arcade.key.ESCAPE:
-            arcade.close_window()
+    def open_stat_win(self):
+        view = self.statistics(self.Game, self.cleaner, self.endgame, self.window, self.icon,
+                               self.bd_handler, GameGUI)
+        self.window.show_view(view)
 
     def clear_file_and_close_event(self):
-        cleaner(JSONPATH)
+        self.cleaner()
         arcade.close_window()
+
