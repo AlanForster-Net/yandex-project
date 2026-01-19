@@ -4,7 +4,7 @@ from arcade.gui.widgets.layout import UIAnchorLayout, UIBoxLayout
 
 
 class EndGame(arcade.View):
-    def __init__(self, level_num, gamegui, game, cleaner, window, max_level, icon, failed, bd_handler):
+    def __init__(self, level_num, gamegui, game, cleaner, window, max_level, icon, failed, bd_handler, statistics):
         super().__init__()
         arcade.set_background_color((56, 56, 56))
         self.game = game
@@ -17,6 +17,7 @@ class EndGame(arcade.View):
         self.level_num = level_num
         self.bd_handler = bd_handler
         self.icon = icon
+        self.statistics = statistics
         self.anchor_layout = UIAnchorLayout()
         self.box_layout = UIBoxLayout(vertical=True, space_between=10)
         self.btn_style = {
@@ -80,17 +81,18 @@ class EndGame(arcade.View):
         self.manager.disable()
 
     def open_menu(self):
-        view = self.gamegui(self.game, self.cleaner, EndGame, self.window, self.icon, self.bd_handler)
+        view = self.gamegui(self.game, self.cleaner, EndGame, self.window, self.icon, self.bd_handler, self.statistics)
         self.window.show_view(view)
 
     def next_lvl(self):
         view = self.game(self.cleaner, self.gamegui, EndGame, self.window, self.icon,
-                         self.bd_handler, self.level_num + 1)
+                         self.bd_handler, self.statistics, self.level_num + 1)
         view.setup()
         self.window.show_view(view)
 
     def retry(self):
-        view = self.game(self.cleaner, self.gamegui, EndGame, self.window, self.icon, self.bd_handler, self.level_num)
+        view = self.game(self.cleaner, self.gamegui, EndGame, self.window, self.icon, self.bd_handler, self.statistics,
+                         self.level_num)
         view.setup()
         self.window.show_view(view)
 

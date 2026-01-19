@@ -159,7 +159,7 @@ class WallOfDeath(arcade.Sprite):
 
 
 class Game(arcade.View):
-    def __init__(self, cleaner, gamegui, endgame, window, icon, bd_handler, n=1):
+    def __init__(self, cleaner, gamegui, endgame, window, icon, bd_handler, statistics, n=1):
         title = f"Run from antivirus! — Level {n}"
         super().__init__()
         arcade.set_background_color(arcade.color.PINK)
@@ -169,6 +169,7 @@ class Game(arcade.View):
         self.window = window
         self.bd_handler = bd_handler
         self.icon = icon
+        self.statistics = statistics
         self.window.set_caption(title)
         self.player = None
         self.player_list = None
@@ -196,6 +197,7 @@ class Game(arcade.View):
         self.timer_running = 0
         self.main_theme = arcade.load_sound("resources/sound/soundtrack.mp3")
         self.music_player = None
+        self.window.set_caption(title)
 
     def init_scene(self, tilemap):
         self.walls = self.tilemap.sprite_lists["wall"]
@@ -344,7 +346,8 @@ class Game(arcade.View):
     def on_key_press(self, key, modifiers):
         if key == arcade.key.ESCAPE:
             arcade.stop_sound(self.music_player)
-            view = self.gamegui(Game, self.cleaner, self.endgame, self.window, self.icon, self.bd_handler)
+            view = self.gamegui(Game, self.cleaner, self.endgame, self.window, self.icon, self.bd_handler,
+                                self.statistics)
             self.window.show_view(view)
         if key == arcade.key.D:
             self.right_pressed = True
@@ -389,11 +392,11 @@ class Game(arcade.View):
     def end_game(self):
         arcade.stop_sound(self.music_player)
         view = self.endgame(self.n, self.gamegui, Game, self.cleaner, self.window, MAX_LEVEL, self.icon, True,
-                            self.bd_handler)
+                            self.bd_handler, self.statistics)
         self.window.show_view(view)
 
     def win_game(self):
         arcade.stop_sound(self.music_player)
         view = self.endgame(self.n, self.gamegui, Game, self.cleaner, self.window, MAX_LEVEL, self.icon, False,
-                            self.bd_handler)
+                            self.bd_handler, self.statistics)
         self.window.show_view(view)

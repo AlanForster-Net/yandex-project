@@ -3,7 +3,7 @@ from arcade.gui import UIManager, UIFlatButton, UIImage, UILabel
 from arcade.gui.widgets.layout import UIAnchorLayout, UIBoxLayout
 
 class GameGUI(arcade.View):
-    def __init__(self, game, cleaner, endgame, window, icon, bd_handler):
+    def __init__(self, game, cleaner, endgame, window, icon, bd_handler, statistics):
         super().__init__()
         self.Game = game
         self.window = window
@@ -11,6 +11,7 @@ class GameGUI(arcade.View):
         self.endgame = endgame
         self.bd_handler = bd_handler
         self.icon = icon
+        self.statistics = statistics
         self.start_level = bd_handler.get_stats('cur_lvl')
         arcade.set_background_color((56, 56, 56))
         self.manager = UIManager()
@@ -20,6 +21,7 @@ class GameGUI(arcade.View):
         self.setup_widgets()
         self.anchor_layout.add(self.box_layout)
         self.manager.add(self.anchor_layout)
+        self.window.set_caption("Run from antivirus! — Idle")
         self.window.set_fullscreen(True)
 
     def setup_widgets(self):
@@ -71,12 +73,15 @@ class GameGUI(arcade.View):
         self.manager.disable()
 
     def start_game(self, junk):
-        view = self.Game(self.cleaner, GameGUI, self.endgame, self.window, self.icon, self.bd_handler, self.start_level)
+        view = self.Game(self.cleaner, GameGUI, self.endgame, self.window, self.icon, self.bd_handler,
+                         self.statistics, self.start_level)
         view.setup()
         self.window.show_view(view)
 
     def open_stat_win(self):
-        pass
+        view = self.statistics(self.Game, self.cleaner, self.endgame, self.window, self.icon,
+                               self.bd_handler, GameGUI)
+        self.window.show_view(view)
 
     def clear_file_and_close_event(self):
         self.cleaner()

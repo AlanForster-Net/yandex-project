@@ -40,3 +40,15 @@ def get_stats(searching, type_of_search='short_name'):
     connection.commit()
     connection.close()
     return value
+
+
+def get_all_stats(rows):
+    connection = sqlite3.connect(DB)
+    cursor = connection.cursor()
+    value = cursor.execute(f"""
+            SELECT {rows} 
+            FROM {STATS_TABLE}
+        """).fetchall()
+    connection.commit()
+    connection.close()
+    return value

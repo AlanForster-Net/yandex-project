@@ -26,7 +26,7 @@ class Dialog(arcade.View):
         self.flat_button = None
         self.writer = writer
         self.window = window
-        arcade.set_background_color(arcade.color.WHITE)
+        arcade.set_background_color((56, 56, 56))
         self.manager = UIManager()
         self.manager.enable()
         self.anchor_layout = UIAnchorLayout()
@@ -43,10 +43,26 @@ class Dialog(arcade.View):
         self.window.close()
 
     def setup_widgets(self):
+        btn_style = {
+            "normal": UIFlatButton.UIStyle(
+                font_size=18,
+                bg=(213, 0, 97, 255)
+            ),
+            "hover": UIFlatButton.UIStyle(
+                font_size=18,
+                bg=(192, 0, 87, 255)
+            ),
+            "press": UIFlatButton.UIStyle(
+                font_size=18,
+                bg=(172, 0, 63, 255)
+            )
+        }
+
+
         screens = get_sc()
         self.dropdown = UIDropdown(options=screens, width=200, color=arcade.color.BLACK, default=screens[0])
         self.box_layout.add(self.dropdown)
-        self.flat_button = UIFlatButton(text="Выбрать экран", width=200, height=50, color=arcade.color.BLACK)
+        self.flat_button = UIFlatButton(text="Выбрать экран", width=200, height=50, style=btn_style)
         self.box_layout.add(self.flat_button)
 
     def on_draw(self):

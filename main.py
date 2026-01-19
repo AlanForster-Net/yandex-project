@@ -10,6 +10,7 @@ from handlers.json_handler import writer, cleaner
 import handlers.bd_handler as bd_handler
 from game.game import Game
 from menu.end_game import EndGame
+from menu.statistics import Statistics
 
 
 class EmptyArgsError(Exception):
@@ -24,8 +25,7 @@ def run():
     screen = arcade.get_screens()[get_screen_data("screenNum")]
     window = arcade.Window(width=screen.width, height=screen.height, fullscreen=False, screen=screen)
     window.set_icon(ICON)
-    window.set_caption("Run from antivirus! — Idle")
-    view = GameGUI(Game, cleaner, EndGame, window, ICON_F, bd_handler)
+    view = GameGUI(Game, cleaner, EndGame, window, ICON_F, bd_handler, Statistics)
     window.show_view(view)
     arcade.run()
 
