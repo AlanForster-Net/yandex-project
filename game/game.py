@@ -1,5 +1,3 @@
-from re import search
-
 import arcade
 from arcade.examples.camera_platform import JUMP_SPEED
 from pyglet.graphics import Batch
