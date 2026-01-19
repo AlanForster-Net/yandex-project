@@ -10,9 +10,10 @@ def get_sc():
     return ans
 
 
-def run_dialog(writer):
+def run_dialog(writer, icon):
     window = arcade.Window(width=400, height=200, fullscreen=False)
     window.set_caption("Выберите экран для запуска")
+    window.set_icon(icon)
     view = Dialog(writer, window)
     window.show_view(view)
     arcade.run()
