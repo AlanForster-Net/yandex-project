@@ -6,6 +6,14 @@ from pyglet.graphics import Batch
 from arcade.experimental.query_demo import SCREEN_HEIGHT, SCREEN_WIDTH
 from pyglet.event import EVENT_HANDLE_STATE
 from handlers.screen_handler import get_screen_data
+import arcade
+import sqlite3
+
+from arcade.examples.camera_platform import JUMP_SPEED
+from pyglet.graphics import Batch
+from arcade.experimental.query_demo import SCREEN_HEIGHT, SCREEN_WIDTH
+from pyglet.event import EVENT_HANDLE_STATE
+from handlers.screen_handler import get_screen_data
 
 # Constants
 TITLE = "Run from antivirus! — Level 1"
@@ -205,6 +213,8 @@ class Game(arcade.View):
         self.timer_running = 0
         self.main_theme = arcade.load_sound("resources/sound/soundtrack.mp3")
         self.music_player = None
+        self.window.set_caption(title)
+        self.music_player = self.main_theme.play(volume=0.3, loop=True)
 
     def init_scene(self, tilemap):
         self.walls = self.tilemap.sprite_lists["wall"]
@@ -214,7 +224,6 @@ class Game(arcade.View):
         self.end = self.tilemap.sprite_lists["end"]
 
     def setup(self):
-        self.music_player = self.main_theme.play(volume=0.3, loop=True)
         self.player = Player(100, 100 // 2, 3)
         self.player_list = arcade.SpriteList()
         self.player_list.append(self.player)
