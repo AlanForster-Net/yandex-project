@@ -7,7 +7,6 @@ from arcade.experimental.query_demo import SCREEN_HEIGHT, SCREEN_WIDTH
 from pyglet.event import EVENT_HANDLE_STATE
 from handlers.screen_handler import get_screen_data
 
-
 # Constants
 TITLE = "Run from antivirus! — Level 1"
 SCREEN = arcade.get_screens()[get_screen_data("screenNum")]
@@ -35,15 +34,15 @@ TILE_SCALE = 2.5
 class Player(arcade.Sprite):
     def __init__(self, x, y, scale=2):
         super().__init__('resources/players_frames/pack1/idle.png', scale=scale)
-        #some attributes
+        # some attributes
         self.live = True
         self.pack_of_skin = 1
-        #posiotion of player
+        # posiotion of player
         self.center_x = x
         self.center_y = y
         self.change_x = 0
         self.change_y = 0
-        #movement things
+        # movement things
         self.jumps_remaining = MAX_JUMPS
         self.max_jumps = MAX_JUMPS
         self.double_jump = False
@@ -52,7 +51,7 @@ class Player(arcade.Sprite):
         self.stamina_refresh_speed = STAMINA_REFRESH_SPEED
         self.stamina_using_speed = SPEED_OF_USING_STAMINA
         self.stamina_using_value = STAMINA_USING_VALUE
-        #textures
+        # textures
         self.frames = dict()
         self.frames["running_right"] = list()
         self.frames["running_left"] = list()
@@ -60,7 +59,7 @@ class Player(arcade.Sprite):
         self.frames["die"] = None
         self.frames["idle"] = None
         self.frames["jump"] = None
-        #base skin
+        # base skin
         self.frames["die"] = arcade.load_texture("resources/players_frames/pack1/die.png")
         self.frames["idle"] = arcade.load_texture("resources/players_frames/pack1/idle.png")
         self.frames["jump"] = arcade.load_texture("resources/players_frames/pack1/jump.png")
@@ -70,22 +69,22 @@ class Player(arcade.Sprite):
         for i in range(1, 5):
             self.frames["running_left"].append(arcade.load_texture(f"resources/players_frames/pack1/run_l_{i}.png"))
 
-        #animation
+        # animation
         self.current_frame = 0
         self.animation_speed = 0.0
         self.animation_timer = 0
 
     def update(self, delta_time=1 / 60):
         super().update()
-        #easter with "капустка"
+        # easter with "капустка"
         if self.pack_of_skin == "easter_pack":
             self.texture = arcade.load_texture("resources/players_frames/easter_pack/капустка.jpg")
             return
-        #checking for alive and change texture
+        # checking for alive and change texture
         if not self.live:
             self.texture = self.frames["die"]
             return
-        #animation
+        # animation
         self.animation_timer += delta_time
         if self.change_y != 0 and self.change_x == 0:
             self.texture = self.frames["jump"]
@@ -121,22 +120,25 @@ class Player(arcade.Sprite):
 
     def update_skin(self, pack_of_skin):
         self.pack_of_skin = pack_of_skin
-        #easter pack
+        # easter pack
         if self.pack_of_skin == "easter_pack":
             self.scale = 0.05
             self.center_y = 150
             return
-        #texture from normal packs
+        # texture from normal packs
         self.frames["die"] = arcade.load_texture(f"resources/players_frames/pack{pack_of_skin}/die.png")
         self.frames["idle"] = arcade.load_texture(f"resources/players_frames/pack{pack_of_skin}/idle.png")
         self.frames["jump"] = arcade.load_texture(f"resources/players_frames/pack{pack_of_skin}/jump.png")
         self.frames["running_right"].clear()
         self.frames["running_left"].clear()
         for i in range(1, 5):
-            self.frames["running_right"].append(arcade.load_texture(f"resources/players_frames/pack{pack_of_skin}/run_r_{i}.png"))
+            self.frames["running_right"].append(
+                arcade.load_texture(f"resources/players_frames/pack{pack_of_skin}/run_r_{i}.png"))
 
         for i in range(1, 5):
-            self.frames["running_left"].append(arcade.load_texture(f"resources/players_frames/pack{pack_of_skin}/run_l_{i}.png"))
+            self.frames["running_left"].append(
+                arcade.load_texture(f"resources/players_frames/pack{pack_of_skin}/run_l_{i}.png"))
+
 
 class WallOfDeath(arcade.Sprite):
     def __init__(self, x, y, scale=1.95):
@@ -163,15 +165,23 @@ class WallOfDeath(arcade.Sprite):
             self.current_frame = (self.current_frame + 1) % 3
             self.texture = self.frames[self.current_frame]
 
-class Game(arcade.Window):
-    def __init__(self, level=1, title="game"):
-        super().__init__(get_screen_data("screenWidth"), get_screen_data("screenHeight"), title=title, fullscreen=True,
-                         screen=SCREEN)
-        self.game_over = False
+
+class Game(arcade.View):
+    def __init__(self, cleaner, gamegui, endgame, window, icon, bd_handler, statistics, n=1):
+        title = f"Run from antivirus! — Level {n}"
+        super().__init__()
+        self.cleaner = cleaner
+        self.gamegui = gamegui
+        self.endgame = endgame
+        self.window = window
+        self.icon = icon
+        self.bd_handler = bd_handler
+        self.statistics = statistics
+        self.pp_eng = None
         arcade.set_background_color(arcade.color.PINK)
         self.player = None
         self.player_list = None
-        self.level = level
+        self.level = n
         self.background_color = arcade.color.BLACK
         self.tilemap = arcade.load_tilemap(f"resources/tile/tilemaps/tilemap{self.level}.tmx", scaling=TILE_SCALE)
         self.walls = arcade.SpriteList()
@@ -210,6 +220,26 @@ class Game(arcade.Window):
         self.player_list.append(self.player)
         self.bug_count = 0
         self.wall_of_death = WallOfDeath(-700, 230)
+        if self.level == 5:
+            self.wall_of_death.center_x = -1400
+            self.wall_of_death.center_y = 400
+            self.wall_of_death.change_x *= ENEMY_SPEED * 0.75
+        elif self.level == 4:
+            self.wall_of_death.change_x *= ENEMY_SPEED * 1
+            self.wall_of_death.change_x *= ENEMY_SPEED * 1.75
+            self.wall_of_death.center_x = -1100
+            self.wall_of_death.center_y = 200
+        elif self.level == 3:
+            self.wall_of_death.change_x *= ENEMY_SPEED * 1.5
+            self.wall_of_death.center_x = -1100
+            self.wall_of_death.center_y = 200
+        elif self.level == 2:
+            self.wall_of_death.change_x *= ENEMY_SPEED * 1.25
+            self.wall_of_death.center_x = -1100
+            self.wall_of_death.center_y = 200
+        else:
+            self.wall_of_death.center_x = -1100
+            self.wall_of_death.center_y = 200
         self.enemy_list = arcade.SpriteList()
         self.enemy_list.append(self.wall_of_death)
         self.player_camera = arcade.camera.Camera2D()
@@ -221,26 +251,26 @@ class Game(arcade.Window):
         self.setup_players_database()
 
     def gui_draw(self):
-        #Stamina bar
-        #Расчёт масштаба по экрану
+        # Stamina bar
+        # Расчёт масштаба по экрану
         scale = self.width / SCREEN_WIDTH * 0.7
-        #Уменьшения смещение влево
+        # Уменьшения смещение влево
         left_shift = 50 * scale
-        #Размеры подложки учитывая масштаб
+        # Размеры подложки учитывая масштаб
         panel_width = int(305 * scale)
         panel_height = int(50 * scale)
-        #расчёт позиции с учётом смещение влева и масштаба
+        # расчёт позиции с учётом смещение влева и масштаба
         panel_x = int(self.width - (275 * scale) - left_shift)
         panel_y = int(25 * scale)
-        #Отрисовка подложки
+        # Отрисовка подложки
         arcade.draw_lbwh_rectangle_filled(
             panel_x, panel_y, panel_width, panel_height, arcade.color.WHITE
         )
-        #Расчёт размера сегмента с учётом масштаба
+        # Расчёт размера сегмента с учётом масштаба
         segment_width = int(95 * scale)
         segment_height = int(44 * scale)
         segment_y = int(panel_y + 3 * scale)
-        #Смещение с сегментов с учётом масштаба
+        # Смещение с сегментов с учётом масштаба
         segment_offset = 5 * scale
 
         if self.player.stamina >= 1:
@@ -267,7 +297,7 @@ class Game(arcade.Window):
                 segment_height,
                 arcade.color.BLACK
             )
-        #timer
+        # timer
         self.batch = Batch()
         base_x = self.width
         base_y = self.height
@@ -301,16 +331,14 @@ class Game(arcade.Window):
         self.gui_draw()
 
     def on_update(self, delta_time=1 / 60):
-        if self.game_over:
-             return
-        base_speed = PLAYER_SPEED #new variable for speed(walking)
+        base_speed = PLAYER_SPEED  # new variable for speed(walking)
         if self.shift_pressed and self.player.stamina > 0:
-            base_speed = SHIFT_SPEED # running
+            base_speed = SHIFT_SPEED  # running
             self.player.stamina -= self.player.stamina_using_speed * delta_time
-        #determine the direction of the vector
+        # determine the direction of the vector
         if self.left_pressed and not self.right_pressed:
             self.player.change_x = -base_speed
-            #calculate stamina if player running
+            # calculate stamina if player running
             if self.shift_pressed and self.player.stamina > 0:
                 self.player.running_left = True
         elif self.right_pressed and not self.left_pressed:
@@ -320,7 +348,7 @@ class Game(arcade.Window):
         else:
             self.player.change_x = 0
 
-        #climbing on ladder
+        # climbing on ladder
         is_on_ladder = self.pp_eng.is_on_ladder()
         if is_on_ladder:
             # По лестнице вверх/вниз
@@ -330,7 +358,7 @@ class Game(arcade.Window):
                 self.player.change_y = -LADDER_SPEED
             else:
                 self.player.change_y = 0
-        #jump
+        # jump
         is_on_ground = self.pp_eng.can_jump()
         if is_on_ground and self.player.live:
             if not self.player.was_on_ground:
@@ -346,7 +374,7 @@ class Game(arcade.Window):
 
         if not self.space_pressed:
             self.space_just_pressed = False
-        #dash
+        # dash
         if self.dash_button and self.right_pressed and self.player.stamina >= 1:
             self.player.stamina -= self.player.stamina_using_value
             self.player.change_x = 0
@@ -367,7 +395,7 @@ class Game(arcade.Window):
         self.player_list.update()
         self.wall_of_death.update(delta_time)
         dead_player = arcade.check_for_collision(self.wall_of_death, self.player)
-        #chacking for alive and here game will stop
+        # chacking for alive and here game will stop
         if dead_player:
             self.player.live = False
             self.end_game()
@@ -384,7 +412,7 @@ class Game(arcade.Window):
         if len(arcade.check_for_collision_with_list(self.player, self.end)) != 0:
             self.scores_and_results()
             self.write_data_in_database()
-            self.next_level()
+            self.win_game()
 
     def update_timer(self, delta_time):
         self.timer_running += 1
@@ -393,52 +421,14 @@ class Game(arcade.Window):
             if self.player.stamina > 3.0:
                 self.player.stamina = 3.0
 
-    def next_level(self):
-        self.level += 1
-        if self.level > MAX_LEVEL:
-            self.win_game()
-        else:
-            self.tilemap = arcade.load_tilemap(f"resources/tile/tilemaps/tilemap{self.level}.tmx", scaling=TILE_SCALE)
-            self.walls = self.tilemap.sprite_lists["wall"]
-            self.collisions = self.tilemap.sprite_lists["collision"]
-            self.traps = self.tilemap.sprite_lists["trap"]
-            self.bugs = self.tilemap.sprite_lists["bug"]
-            self.end = self.tilemap.sprite_lists["end"]
-            self.pp_eng = arcade.PhysicsEnginePlatformer(player_sprite=self.player,
-                                                         platforms=self.collisions,
-                                                         gravity_constant=GRAVITY)
-            self.player.center_x = 100
-            self.player.center_y = 100
-
-            if self.level == 5:
-                self.wall_of_death.center_x = -1400
-                self.wall_of_death.center_y = 400
-                self.wall_of_death.change_x *= ENEMY_SPEED * 0.75
-            elif self.level == 4:
-                self.wall_of_death.change_x *= ENEMY_SPEED * 1
-                self.wall_of_death.change_x *= ENEMY_SPEED * 1.75
-                self.wall_of_death.center_x = -1100
-                self.wall_of_death.center_y = 200
-            elif self.level == 3:
-                self.wall_of_death.change_x *= ENEMY_SPEED * 1.5
-                self.wall_of_death.center_x = -1100
-                self.wall_of_death.center_y = 200
-            elif self.level == 2:
-                self.wall_of_death.change_x *= ENEMY_SPEED * 1.25
-                self.wall_of_death.center_x = -1100
-                self.wall_of_death.center_y = 200
-            else:
-                self.wall_of_death.center_x = -1100
-                self.wall_of_death.center_y = 200
-
     def scores_and_results(self):
         pass
 
     def on_key_press(self, key, modifiers):
-        if key == arcade.key.BACKSPACE:
-            self.next_level()
         if key == arcade.key.ESCAPE:
-            arcade.close_window()
+            arcade.stop_sound(self.music_player)
+            view = self.gamegui(Game, self.cleaner, self.endgame, self.window, self.icon, self.bd_handler,
+                                self.statistics)
         if key == arcade.key.D:
             self.right_pressed = True
         if key == arcade.key.A:
@@ -454,6 +444,8 @@ class Game(arcade.Window):
             self.w_pressed = True
         if key == arcade.key.S:
             self.s_pressed = True
+        if key == arcade.key.DELETE:
+            self.end_game()
 
     def on_key_release(self, key, modifiers):
         if key == arcade.key.A:
@@ -478,17 +470,13 @@ class Game(arcade.Window):
         pass
 
     def end_game(self):
-        self.game_over = True
+        arcade.stop_sound(self.music_player)
+        view = self.endgame(self.level, self.gamegui, Game, self.cleaner, self.window, MAX_LEVEL, self.icon, True,
+                            self.bd_handler, self.statistics)
+        self.window.show_view(view)
 
     def win_game(self):
-        self.game_over = False
-
-
-def setup_game():
-    win = Game()
-    win.setup()
-    arcade.run()
-
-
-if __name__ == "__main__":
-    setup_game()
+        arcade.stop_sound(self.music_player)
+        view = self.endgame(self.level, self.gamegui, Game, self.cleaner, self.window, MAX_LEVEL, self.icon, False,
+                            self.bd_handler, self.statistics)
+        self.window.show_view(view)
