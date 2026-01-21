@@ -260,6 +260,7 @@ class Game(arcade.View):
         self.collisions = self.tilemap.sprite_lists["collision"]
         self.traps = self.tilemap.sprite_lists["trap"]
         self.bugs = self.tilemap.sprite_lists["bug"]
+        self.ladders = self.tilemap.sprite_lists["ladder"]
         self.end = self.tilemap.sprite_lists["end"]
 
     def setup(self):
@@ -299,6 +300,7 @@ class Game(arcade.View):
         self.gui_camera = arcade.camera.Camera2D()
         self.pp_eng = arcade.PhysicsEnginePlatformer(player_sprite=self.player,
                                                      platforms=self.collisions,
+                                                     ladders=self.ladders,
                                                      gravity_constant=GRAVITY)
         arcade.schedule(self.update_timer, 1.0)
 
