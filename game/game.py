@@ -1,18 +1,11 @@
+import random
 import arcade
+from arcade.particles import FadeParticle, Emitter, EmitBurst, EmitInterval, EmitMaintainCount
 import sqlite3
 
 from arcade.examples.camera_platform import JUMP_SPEED
 from pyglet.graphics import Batch
 from arcade.experimental.query_demo import SCREEN_HEIGHT, SCREEN_WIDTH
-from pyglet.event import EVENT_HANDLE_STATE
-from handlers.screen_handler import get_screen_data
-import arcade
-import sqlite3
-
-from arcade.examples.camera_platform import JUMP_SPEED
-from pyglet.graphics import Batch
-from arcade.experimental.query_demo import SCREEN_HEIGHT, SCREEN_WIDTH
-from pyglet.event import EVENT_HANDLE_STATE
 from handlers.screen_handler import get_screen_data
 
 # Constants
@@ -36,6 +29,39 @@ ENEMY_SPEED = 1
 GRAVITY = 0.8
 MAX_LEVEL = 5
 TILE_SCALE = 2.5
+
+#textures for blood
+BLOOD_TEX = [
+    arcade.make_soft_circle_texture(20, arcade.color.DARK_RED),
+    arcade.make_soft_circle_texture(15, arcade.color.RED),
+    arcade.make_soft_circle_texture(16, arcade.color.BURGUNDY),
+]
+
+def blood_spray_mutator(p):
+    p.change_y -= 0.18
+
+    p.change_x *= 0.96
+    p.change_y *= 0.96
+
+    p.alpha = max(0, p.alpha - 3)
+
+def make_blood_spray(x, y, count=500):
+    return Emitter(
+        center_xy=(x, y),
+        emit_controller=EmitBurst(count),
+        particle_factory=lambda e: FadeParticle(
+            filename_or_texture=random.choice(BLOOD_TEX),
+            change_xy=(
+                random.uniform(-5.0, 5.0),
+                random.uniform(2.5, 7.0),
+            ),
+            lifetime=random.uniform(0.8, 1.6),
+            start_alpha=255,
+            end_alpha=0,
+            scale=random.uniform(0.35, 0.6),
+            mutation_callback=blood_spray_mutator,
+        ),
+    )
 
 
 # classes
@@ -178,6 +204,7 @@ class Game(arcade.View):
     def __init__(self, cleaner, gamegui, endgame, window, icon, bd_handler, statistics, n=1):
         title = f"Run from antivirus! — Level {n}"
         super().__init__()
+        self.emitters = list()
         self.cleaner = cleaner
         self.gamegui = gamegui
         self.endgame = endgame
@@ -334,6 +361,8 @@ class Game(arcade.View):
         self.traps.draw()
         self.end.draw()
         self.bugs.draw()
+        for e in self.emitters:
+            e.draw()
         self.player_list.draw()
         self.enemy_list.draw()
         self.gui_camera.use()
@@ -347,13 +376,8 @@ class Game(arcade.View):
         # determine the direction of the vector
         if self.left_pressed and not self.right_pressed:
             self.player.change_x = -base_speed
-            # calculate stamina if player running
-            if self.shift_pressed and self.player.stamina > 0:
-                self.player.running_left = True
         elif self.right_pressed and not self.left_pressed:
             self.player.change_x = base_speed
-            if self.shift_pressed and self.player.stamina > 0:
-                self.player.running_right = True
         else:
             self.player.change_x = 0
 
@@ -367,6 +391,7 @@ class Game(arcade.View):
                 self.player.change_y = -LADDER_SPEED
             else:
                 self.player.change_y = 0
+
         # jump
         is_on_ground = self.pp_eng.can_jump()
         if is_on_ground and self.player.live:
@@ -383,6 +408,7 @@ class Game(arcade.View):
 
         if not self.space_pressed:
             self.space_just_pressed = False
+
         # dash
         if self.dash_button and self.right_pressed and self.player.stamina >= 1:
             self.player.stamina -= self.player.stamina_using_value
@@ -395,29 +421,52 @@ class Game(arcade.View):
             self.player.center_x -= DASH_GAP
             self.dash_button = False
 
+        # ВАЖНО: обновляем физический движок
         self.pp_eng.update()
+
+        # Обновляем позицию камеры
         pos = (self.player.center_x, self.player.center_y)
         self.player_camera.position = arcade.math.lerp_2d(self.player_camera.position,
                                                           pos,
                                                           0.14)
+
+        emitters_copy = self.emitters.copy()
+        for e in emitters_copy:
+            e.update(delta_time)
+
+        for e in emitters_copy:
+            if e.can_reap():
+                self.emitters.remove(e)
+
+        # Обновляем спрайты
         self.enemy_list.update()
         self.player_list.update()
         self.wall_of_death.update(delta_time)
+
+        # Проверка столкновений
         dead_player = arcade.check_for_collision(self.wall_of_death, self.player)
-        # chacking for alive and here game will stop
         if dead_player:
             self.player.live = False
             self.end_game()
+
         c_bugs = arcade.check_for_collision_with_list(self.player, self.bugs)
         c_bug_2 = arcade.check_for_collision_with_list(self.wall_of_death, self.bugs)
-        c_bugs += c_bug_2
+
+        # Обработка столкновений
         for bug in c_bugs:
             bug.remove_from_sprite_lists()
             self.bug_count += 1
+
+        for bug in c_bug_2:
+            bug.remove_from_sprite_lists()
+            self.emitters.append(make_blood_spray(bug.center_x, bug.center_y))
+
         if arcade.check_for_collision(self.player, self.wall_of_death):
             self.end_game()
+
         if len(arcade.check_for_collision_with_list(self.player, self.traps)) != 0:
             self.end_game()
+
         if len(arcade.check_for_collision_with_list(self.player, self.end)) != 0:
             self.scores_and_results()
             self.write_data_in_database()
