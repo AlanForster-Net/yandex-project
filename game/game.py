@@ -1,7 +1,6 @@
 import random
 import arcade
-from arcade.particles import FadeParticle, Emitter, EmitBurst, EmitInterval, EmitMaintainCount
-import sqlite3
+from arcade.particles import FadeParticle, Emitter, EmitBurst
 
 from arcade.examples.camera_platform import JUMP_SPEED
 from pyglet.graphics import Batch
@@ -30,13 +29,15 @@ GRAVITY = 0.8
 MAX_LEVEL = 5
 TILE_SCALE = 2.5
 
-#textures for blood
+# textures for blood
 BLOOD_TEX = [
     arcade.make_soft_circle_texture(20, arcade.color.DARK_RED),
     arcade.make_soft_circle_texture(15, arcade.color.RED),
     arcade.make_soft_circle_texture(16, arcade.color.BURGUNDY),
 ]
 
+
+# mutator for blood
 def blood_spray_mutator(p):
     p.change_y -= 0.18
 
@@ -45,6 +46,8 @@ def blood_spray_mutator(p):
 
     p.alpha = max(0, p.alpha - 3)
 
+
+# fabric of blood
 def make_blood_spray(x, y, count=500):
     return Emitter(
         center_xy=(x, y),
@@ -76,7 +79,7 @@ class Player(arcade.Sprite):
         self.center_y = y
         self.change_x = 0
         self.change_y = 0
-        # movement things
+        # movement variables
         self.jumps_remaining = MAX_JUMPS
         self.max_jumps = MAX_JUMPS
         self.double_jump = False
@@ -179,14 +182,15 @@ class WallOfDeath(arcade.Sprite):
         super().__init__('resources/enemy_frames/death_wall(1).png', scale=scale)
         self.center_x = x
         self.center_y = y
-
+        # textures for wall
         self.frames = [arcade.load_texture("resources/enemy_frames/death_wall(1).png"),
                        arcade.load_texture("resources/enemy_frames/death_wall(2).png"),
                        arcade.load_texture("resources/enemy_frames/death_wall(3).png")]
+        # animation variables
         self.animation_speed = 0.8
         self.current_frame = 0
         self.animation_timer = 0
-
+        # move variables
         self.change_x = ENEMY_SPEED
         self.height = self.height * 1.25
         self.width = self.width * 1.25
@@ -194,6 +198,7 @@ class WallOfDeath(arcade.Sprite):
     def update(self, delta_time):
         super().update()
         self.animation_timer += delta_time
+        # make animation
         if self.animation_timer >= self.animation_speed:
             self.animation_timer = 0
             self.current_frame = (self.current_frame + 1) % 3
@@ -205,6 +210,7 @@ class Game(arcade.View):
         title = f"Run from antivirus! — Level {n}"
         super().__init__()
         self.emitters = list()
+        # variables for view
         self.cleaner = cleaner
         self.gamegui = gamegui
         self.endgame = endgame
@@ -212,10 +218,12 @@ class Game(arcade.View):
         self.icon = icon
         self.bd_handler = bd_handler
         self.statistics = statistics
+        # physic engine
         self.pp_eng = None
         arcade.set_background_color(arcade.color.PINK)
         self.player = None
         self.player_list = None
+        # variables for levels
         self.level = n
         self.background_color = arcade.color.BLACK
         self.tilemap = arcade.load_tilemap(f"resources/tile/tilemaps/tilemap{self.level}.tmx", scaling=TILE_SCALE)
@@ -229,6 +237,7 @@ class Game(arcade.View):
         self.traps = self.tilemap.sprite_lists["trap"]
         self.bugs = self.tilemap.sprite_lists["bug"]
         self.end = self.tilemap.sprite_lists["end"]
+        # flag of controllers button
         self.left_pressed = False
         self.right_pressed = False
         self.space_pressed = False
@@ -237,12 +246,15 @@ class Game(arcade.View):
         self.dash_button = False
         self.w_pressed = False
         self.s_pressed = False
+        # timer of game
         self.timer_running = 0
+        # music player
         self.main_theme = arcade.load_sound("resources/sound/soundtrack.mp3")
         self.music_player = None
         self.window.set_caption(title)
         self.music_player = self.main_theme.play(volume=0.3, loop=True)
 
+    # function for changing levels
     def init_scene(self, tilemap):
         self.walls = self.tilemap.sprite_lists["wall"]
         self.collisions = self.tilemap.sprite_lists["collision"]
@@ -251,11 +263,14 @@ class Game(arcade.View):
         self.end = self.tilemap.sprite_lists["end"]
 
     def setup(self):
+        # initilizate of player
         self.player = Player(100, 100 // 2, 3)
         self.player_list = arcade.SpriteList()
         self.player_list.append(self.player)
         self.bug_count = 0
+        # initilizate wall
         self.wall_of_death = WallOfDeath(-700, 230)
+        # positions for each levels
         if self.level == 5:
             self.wall_of_death.center_x = -1400
             self.wall_of_death.center_y = 400
@@ -276,39 +291,37 @@ class Game(arcade.View):
         else:
             self.wall_of_death.center_x = -1100
             self.wall_of_death.center_y = 200
+        # lists for player and enemy
         self.enemy_list = arcade.SpriteList()
         self.enemy_list.append(self.wall_of_death)
+        # camera
         self.player_camera = arcade.camera.Camera2D()
         self.gui_camera = arcade.camera.Camera2D()
         self.pp_eng = arcade.PhysicsEnginePlatformer(player_sprite=self.player,
                                                      platforms=self.collisions,
                                                      gravity_constant=GRAVITY)
         arcade.schedule(self.update_timer, 1.0)
-        self.setup_players_database()
 
     def gui_draw(self):
         # Stamina bar
-        # Расчёт масштаба по экрану
-        scale = self.width / SCREEN_WIDTH * 0.7
-        # Уменьшения смещение влево
-        left_shift = 50 * scale
-        # Размеры подложки учитывая масштаб
-        panel_width = int(305 * scale)
+        scale = self.width / SCREEN_WIDTH * 0.7  # scale for different monitors
+        left_shift = 50 * scale  # shift with scale
+        panel_width = int(305 * scale)  # size of stamina bar
         panel_height = int(50 * scale)
-        # расчёт позиции с учётом смещение влева и масштаба
+        # stamina's bar positon
         panel_x = int(self.width - (275 * scale) - left_shift)
         panel_y = int(25 * scale)
-        # Отрисовка подложки
+        # drawing everything
         arcade.draw_lbwh_rectangle_filled(
             panel_x, panel_y, panel_width, panel_height, arcade.color.WHITE
         )
-        # Расчёт размера сегмента с учётом масштаба
+        # size of segments
         segment_width = int(95 * scale)
         segment_height = int(44 * scale)
         segment_y = int(panel_y + 3 * scale)
-        # Смещение с сегментов с учётом масштаба
+        # segment's shift
         segment_offset = 5 * scale
-
+        # drawing segments
         if self.player.stamina >= 1:
             arcade.draw_lbwh_rectangle_filled(
                 int(panel_x + segment_offset),
@@ -384,7 +397,7 @@ class Game(arcade.View):
         # climbing on ladder
         is_on_ladder = self.pp_eng.is_on_ladder()
         if is_on_ladder:
-            # По лестнице вверх/вниз
+            # up/down on leader
             if self.w_pressed and not self.s_pressed:
                 self.player.change_y = LADDER_SPEED
             elif self.s_pressed and not self.w_pressed:
@@ -400,7 +413,7 @@ class Game(arcade.View):
                 self.player.was_on_ground = True
         else:
             self.player.was_on_ground = False
-
+        # double jump
         if self.space_just_pressed and self.player.jumps_remaining > 0 and self.player.stamina >= 1:
             self.player.change_y = JUMP_SPEED
             self.player.jumps_remaining -= 1
@@ -421,15 +434,14 @@ class Game(arcade.View):
             self.player.center_x -= DASH_GAP
             self.dash_button = False
 
-        # ВАЖНО: обновляем физический движок
         self.pp_eng.update()
 
-        # Обновляем позицию камеры
+        # update camera's position
         pos = (self.player.center_x, self.player.center_y)
         self.player_camera.position = arcade.math.lerp_2d(self.player_camera.position,
                                                           pos,
                                                           0.14)
-
+        # update emitters' position
         emitters_copy = self.emitters.copy()
         for e in emitters_copy:
             e.update(delta_time)
@@ -438,12 +450,12 @@ class Game(arcade.View):
             if e.can_reap():
                 self.emitters.remove(e)
 
-        # Обновляем спрайты
+        # Sprites update
         self.enemy_list.update()
         self.player_list.update()
         self.wall_of_death.update(delta_time)
 
-        # Проверка столкновений
+        # Calculate collusion of player
         dead_player = arcade.check_for_collision(self.wall_of_death, self.player)
         if dead_player:
             self.player.live = False
@@ -452,26 +464,25 @@ class Game(arcade.View):
         c_bugs = arcade.check_for_collision_with_list(self.player, self.bugs)
         c_bug_2 = arcade.check_for_collision_with_list(self.wall_of_death, self.bugs)
 
-        # Обработка столкновений
+        # Count collected bugs
         for bug in c_bugs:
             bug.remove_from_sprite_lists()
             self.bug_count += 1
 
         for bug in c_bug_2:
             bug.remove_from_sprite_lists()
-            self.emitters.append(make_blood_spray(bug.center_x, bug.center_y))
-
+            self.emitters.append(make_blood_spray(bug.center_x, bug.center_y))  # burst them!
+        # collusion with wall
         if arcade.check_for_collision(self.player, self.wall_of_death):
             self.end_game()
-
+        # fall into trap
         if len(arcade.check_for_collision_with_list(self.player, self.traps)) != 0:
             self.end_game()
-
+        # reach the end
         if len(arcade.check_for_collision_with_list(self.player, self.end)) != 0:
-            self.scores_and_results()
-            self.write_data_in_database()
             self.win_game()
 
+    # timer of running
     def update_timer(self, delta_time):
         self.timer_running += 1
         if self.player.stamina < 3.0:
@@ -479,10 +490,8 @@ class Game(arcade.View):
             if self.player.stamina > 3.0:
                 self.player.stamina = 3.0
 
-    def scores_and_results(self):
-        pass
-
     def on_key_press(self, key, modifiers):
+        # controllers buttons
         if key == arcade.key.ESCAPE:
             arcade.stop_sound(self.music_player)
             view = self.gamegui(Game, self.cleaner, self.endgame, self.window, self.icon, self.bd_handler,
@@ -520,12 +529,6 @@ class Game(arcade.View):
             self.w_pressed = False
         if key == arcade.key.S:
             self.s_pressed = False
-
-    def setup_players_database(self):
-        pass
-
-    def write_data_in_database(self):
-        pass
 
     def end_game(self):
         arcade.stop_sound(self.music_player)
