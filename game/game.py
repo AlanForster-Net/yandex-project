@@ -356,7 +356,7 @@ class Game(arcade.View):
         desired_offset = 20
         text_x = int(base_x + (desired_offset * scale) - left_shift)
         text_y = int(base_y - (desired_offset * scale))
-        font = int(10 * scale)
+        font = int(15 * scale)
         str_for_timer = (f'{self.timer_running // 60}:{self.timer_running % 60}')
         text = arcade.Text(
             str_for_timer,
@@ -366,6 +366,22 @@ class Game(arcade.View):
             font,
             anchor_x="center",
             anchor_y="center",
+            batch=self.batch
+        )
+        #score bar
+        bug_font_size = int(15 * scale)
+        bug_counter_text = f"Bugs: {self.bug_count}"
+        bug_text_x = int(self.width / 2)
+        bug_text_y = int(self.height - (20 * scale))
+
+        bug_text = arcade.Text(
+            bug_counter_text,
+            bug_text_x,
+            bug_text_y,
+            arcade.color.WHITE,
+            bug_font_size,
+            anchor_x="center",
+            anchor_y="top",
             batch=self.batch
         )
         self.batch.draw()
