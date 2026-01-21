@@ -1,29 +1,34 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="64" height="60" tilewidth="16" tileheight="16" infinite="0" nextlayerid="6" nextobjectid="1">
+<map version="1.8" tiledversion="1.8.2" orientation="orthogonal" renderorder="right-down" width="120" height="60" tilewidth="16" tileheight="16" infinite="0" nextlayerid="7" nextobjectid="1">
  <tileset firstgid="1" source="../tileset1.tsx"/>
- <layer id="2" name="collision" width="64" height="60">
+ <layer id="2" name="collision" width="120" height="60" visible="0">
   <data encoding="base64" compression="zlib">
-   eJzt2LENACEMBEFaov/myAn4BHHwnpEsQntTWgMAAAAAAAAAAOBF3ZSlX7/+uvTr11+Xfv3667qlP3XDLf0p6f559+lb0v1pqf6vnadu2vl/tHr/Pvrf7R/wwjaO
+   eJzt2GEORDAQBlBX2vtfbrP/RCydUp3We0nDojF8JbXLAgAAAAAAAAAAAAAAAAAAAAAA4/lo0zfmJN+5yXdu8p2bfI+NPkcZufaImvnk0bGjzE+z19fLCNmVmOEafjJ882UcE9nqaeUs+wzjo4WZruVJo4yDEWpcG6HWTO+BDDVEfP6sl/ZZbzvrH31n/ztPTyPnu/d77/izb5yWet/bLPleeRa3+6PP3NXrP+rf+95mybdUplpLauldb+98a963rR3VFD3/2/ONuqvW6Li66zxP6/lfT83+6PbS/a1kyfdqW4LLmnlS6VjM8u35U3Mf9/qebd+u392W4LJlvm8n37lt79cXfs5Hlw==
   </data>
  </layer>
- <layer id="1" name="wall" width="64" height="60">
+ <layer id="1" name="wall" width="120" height="60">
   <data encoding="base64" compression="zlib">
-   eJzt0rENgDAMRUEXMA77r0dDRZMCKT/Bd5KV0npyqgAAAAAAAAAAANjRadrSr19/X/r16+9Lv379fa3Sf4T2rtKfku5/3332P0j3p6X6R3ee9Q+uZ9fXqcH799G/b/8NpZAFAQ==
+   eJzt19uOgyAUBVAeOv//y5NmXoyhwrEwXFwrIVqUSthANCUAAAAAAAAAAAAAAAAAAAAAAFjPj7J9YU/y3Zt89ybfvcn32utQVvSUfF8pntXVvXf+b4Sn5Bu1QnY1dsn3vJ5G5DLjnNgl35JS9jPMjx6ekm9rq8yD1fJdYUxn2gdWzDd3XtvmWFdqH92zPz1npJXzzf3O3V/6xulJvn++WYvn69E1920GV+3lGzN6vI5q+jK6v6PzvbPf9nbVp+jzn55vVKvxis6rVs/5b6PyvbtOo/W113uZId/cO0m0pODxzntS7bvQLN+eb3fGMde2VH8+b11S8Ngz35nIN0++7fL9BTiXBxE=
   </data>
  </layer>
- <layer id="3" name="trap" width="64" height="60">
+ <layer id="3" name="trap" width="120" height="60">
   <data encoding="base64" compression="zlib">
-   eJztw0EJAAAIBLALYv+cNri3yAZLAAAAAAAAAAAAAAAAAADglymvW8LAAMU=
+   eJztzUEGADAMBMA8pP9/Zw+5VKk2hF5mWGJZiQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIA0CnnZdP36narT9tbv92oClokHxQ==
   </data>
  </layer>
- <layer id="4" name="bug" width="64" height="60">
+ <layer id="4" name="bug" width="120" height="60">
   <data encoding="base64" compression="zlib">
-   eJzt0UENADAMAsD6mn9fc7D9aNrcGQBCFQAAAAAAAAAAAAAAAAA/p7sAEdN/fvVPbOvOhy0u/XMBYw==
+   eJzt16ENADAIBEAWYv/1Kmqqi6A0dwmaBwURAAAAAAAAAAAAAAAAAAAAAAAAAEBVdgcAAAB4hP8IAIDfuHFrOvZ32zOPmqKaddKsAGwLNKkBww==
   </data>
  </layer>
- <layer id="5" name="end" width="64" height="60">
+ <layer id="5" name="end" width="120" height="60">
   <data encoding="base64" compression="zlib">
-   eJztz7ENAAAIw7Dy/9M80J0BW8oBSQAAAAAAAAAAAAAAAABuTekT//79//2HZgG6kAAa
+   eJztzjEBAAAIwKB1sn83G/j6QAIKAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABqvgMAnBaRBwA0
+  </data>
+ </layer>
+ <layer id="6" name="ladder" width="120" height="60">
+  <data encoding="base64" compression="zlib">
+   eJzt0AEJgFAAxcCfyv7R7CD4ZHKXYOwcAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOBvrq8DHqp2r1U/VbvXqp+q3WvVT9Xuteqnavda9VO1e636qdq9Vv1U7QbgXTd7lANh
   </data>
  </layer>
 </map>

@@ -236,6 +236,7 @@ class Game(arcade.View):
         self.collisions = self.tilemap.sprite_lists["collision"]
         self.traps = self.tilemap.sprite_lists["trap"]
         self.bugs = self.tilemap.sprite_lists["bug"]
+        self.ladders = self.tilemap.sprite_lists["ladder"]
         self.end = self.tilemap.sprite_lists["end"]
         # flag of controllers button
         self.left_pressed = False
@@ -376,6 +377,7 @@ class Game(arcade.View):
         self.traps.draw()
         self.end.draw()
         self.bugs.draw()
+        self.ladders.draw()
         for e in self.emitters:
             e.draw()
         self.player_list.draw()
