@@ -471,6 +471,7 @@ class Game(arcade.View):
         # Count collected bugs
         for bug in c_bugs:
             bug.remove_from_sprite_lists()
+            self.emitters.append(make_blood_spray(bug.center_x, bug.center_y))
             self.bug_count += 1
 
         for bug in c_bug_2:
