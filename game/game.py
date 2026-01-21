@@ -287,7 +287,7 @@ class Game(arcade.View):
         elif self.level == 2:
             self.wall_of_death.change_x *= ENEMY_SPEED * 1.25
             self.wall_of_death.center_x = -1100
-            self.wall_of_death.center_y = 200
+            self.wall_of_death.center_y = 199
         else:
             self.wall_of_death.center_x = -1100
             self.wall_of_death.center_y = 200
