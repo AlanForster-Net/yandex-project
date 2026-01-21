@@ -32,14 +32,14 @@ TILE_SCALE = 2.5
 # textures for blood
 BLOOD_TEX = [
     arcade.make_soft_circle_texture(20, arcade.color.DARK_RED),
-    arcade.make_soft_circle_texture(15, arcade.color.RED),
+    arcade.make_soft_circle_texture(15, arcade.color.DARK_CANDY_APPLE_RED),
     arcade.make_soft_circle_texture(16, arcade.color.BURGUNDY),
 ]
 
 
 # mutator for blood
 def blood_spray_mutator(p):
-    p.change_y -= 0.18
+    p.change_y -= 0.58
 
     p.change_x *= 0.96
     p.change_y *= 0.96
@@ -419,6 +419,11 @@ class Game(arcade.View):
             self.player.was_on_ground = False
         # double jump
         if self.space_just_pressed and self.player.jumps_remaining > 0 and self.player.stamina >= 1:
+            if is_on_ground:
+                self.bd_handler.add_stats(searching='jumps')
+            else:
+                self.bd_handler.add_stats(searching='double')
+
             self.player.change_y = JUMP_SPEED
             self.player.jumps_remaining -= 1
             self.space_just_pressed = False
@@ -428,11 +433,13 @@ class Game(arcade.View):
 
         # dash
         if self.dash_button and self.right_pressed and self.player.stamina >= 1:
+            self.bd_handler.add_stats(searching='dash')
             self.player.stamina -= self.player.stamina_using_value
             self.player.change_x = 0
             self.player.center_x += DASH_GAP
             self.dash_button = False
         elif self.dash_button and self.left_pressed and self.player.stamina >= 1:
+            self.bd_handler.add_stats(searching='dash')
             self.player.stamina -= self.player.stamina_using_value
             self.player.change_x = 0
             self.player.center_x -= DASH_GAP
