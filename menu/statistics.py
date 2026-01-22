@@ -1,3 +1,4 @@
+#import dependencies
 import arcade
 from arcade.gui import UIManager, UIFlatButton, UILabel, UIImage
 from arcade.gui.experimental import UIScrollArea
@@ -5,6 +6,7 @@ from arcade.gui.widgets.layout import UIAnchorLayout, UIBoxLayout
 from arcade.gui.experimental.scroll_area import UIScrollBar
 
 
+#stats window class
 class Statistics(arcade.View):
     def __init__(self, game, cleaner, endgame, window, icon, bd_handler, gamegui):
         super().__init__()
@@ -27,6 +29,7 @@ class Statistics(arcade.View):
         self.manager.add(self.anchor_layout)
         self.window.set_caption('Run from antivirus! - Статистика')
 
+    #setup gui elements
     def setup_widgets(self):
         content_left = UIAnchorLayout(size_hint=(0.5, 1))
         self.anchor_layout.add(content_left, anchor_x="left", anchor_y="center")
@@ -48,8 +51,6 @@ class Statistics(arcade.View):
         scroll_layout.with_border(color=arcade.uicolor.WHITE_CLOUDS)
         scroll_layout.add(vertical_list)
         v_scroll_area.add(UIScrollBar(scroll_layout))
-
-
         btn_style = {
             "normal": UIFlatButton.UIStyle(
                 font_size=int(18 * self.scale),
@@ -77,14 +78,17 @@ class Statistics(arcade.View):
         to_menu_btn.on_click = lambda a: self.to_menu()
         self.box_layout.add(to_menu_btn)
 
+    #draw all gui
     def on_draw(self):
         self.clear()
         self.manager.draw()
 
+    #return to menu button handler
     def to_menu(self):
         view = self.gamegui(self.game, self.cleaner, self.endgame, self.window, self.icon,
                                self.bd_handler, Statistics)
         self.window.show_view(view)
 
+    #close manager to avoid error
     def on_close(self):
         self.manager.disable()

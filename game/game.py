@@ -355,7 +355,7 @@ class Game(arcade.View):
         text_x = int(base_x + (desired_offset * scale) - left_shift)
         text_y = int(base_y - (desired_offset * scale))
         font = int(15 * scale)
-        str_for_timer = (f'{self.timer_running // 60}:{self.timer_running % 60}')
+        str_for_timer = f'{self.timer_running // 60}:{self.timer_running % 60}'
         text = arcade.Text(
             str_for_timer,
             text_x,
@@ -561,11 +561,11 @@ class Game(arcade.View):
     def end_game(self):
         arcade.stop_sound(self.music_player)
         view = self.endgame(self.level, self.gamegui, Game, self.cleaner, self.window, MAX_LEVEL, self.icon, True,
-                            self.bd_handler, self.statistics)
+                            self.bd_handler, self.timer_running, self.statistics)
         self.window.show_view(view)
 
     def win_game(self):
         arcade.stop_sound(self.music_player)
         view = self.endgame(self.level, self.gamegui, Game, self.cleaner, self.window, MAX_LEVEL, self.icon, False,
-                            self.bd_handler, self.statistics, self.bug_count)
+                            self.bd_handler, self.statistics, self.timer_running, self.bug_count)
         self.window.show_view(view)

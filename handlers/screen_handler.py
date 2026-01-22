@@ -1,7 +1,9 @@
+#import dependencies
 import arcade
 from handlers.json_handler import reader, generate
 
 
+#check correction of screen in file
 def check_screen():
     generate()
     data = reader()
@@ -20,6 +22,7 @@ def check_screen():
     return 0
 
 
+#get info about screen from file
 def get_screen_data(typ):
     try:
         data = reader()

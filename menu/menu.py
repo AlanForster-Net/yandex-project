@@ -1,8 +1,10 @@
+#import dependencies
 import arcade
 from arcade.gui import UIManager, UIFlatButton, UIImage, UILabel
 from arcade.gui.widgets.layout import UIAnchorLayout, UIBoxLayout
 
 
+#gui screen class
 class GameGUI(arcade.View):
     def __init__(self, game, cleaner, endgame, window, icon, bd_handler, statistics):
         super().__init__()
@@ -28,6 +30,7 @@ class GameGUI(arcade.View):
         self.window.set_caption("Run from antivirus! — Idle")
         self.window.set_fullscreen(True)
 
+    #setup of widgets of gui
     def setup_widgets(self):
         btn_style = {
             "normal": UIFlatButton.UIStyle(
@@ -67,26 +70,30 @@ class GameGUI(arcade.View):
         self.box_layout.add(exit_with_open)
         self.box_layout.add(exit_btn)
 
-
+    #draw all gui elements
     def on_draw(self):
         self.clear()
         self.manager.draw()
         pass
 
+    #close manager to avoid error
     def on_close(self):
         self.manager.disable()
 
+    #handler of start button pressing
     def start_game(self, junk):
         view = self.Game(self.cleaner, GameGUI, self.endgame, self.window, self.icon, self.bd_handler,
                          self.statistics, self.start_level)
         view.setup()
         self.window.show_view(view)
 
+    #handler of stats pressing
     def open_stat_win(self):
         view = self.statistics(self.Game, self.cleaner, self.endgame, self.window, self.icon,
                                self.bd_handler, GameGUI)
         self.window.show_view(view)
 
+    #exit with clean screen cfg
     def clear_file_and_close_event(self):
         self.cleaner()
         arcade.close_window()

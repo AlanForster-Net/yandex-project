@@ -1,8 +1,10 @@
+#import dependencies
 import arcade
 from arcade.gui import UIManager, UIDropdown, UIFlatButton
 from arcade.gui.widgets.layout import UIAnchorLayout, UIBoxLayout
 
 
+#get all screens in user's system func
 def get_sc():
     ans = []
     for x in enumerate(arcade.get_screens()):
@@ -10,6 +12,7 @@ def get_sc():
     return ans
 
 
+#running a dialog
 def run_dialog(writer, icon):
     window = arcade.Window(width=400, height=200, fullscreen=False)
     window.set_caption("Выберите экран для запуска")
@@ -18,7 +21,7 @@ def run_dialog(writer, icon):
     window.show_view(view)
     arcade.run()
 
-
+#dialog class
 class Dialog(arcade.View):
     def __init__(self, writer, window):
         super().__init__()
@@ -36,12 +39,14 @@ class Dialog(arcade.View):
         self.manager.add(self.anchor_layout)
         self.setup_clicks()
 
+    #handler of confirm button
     def button_handler(self):
         current = int(self.dropdown.value.split(".")[0]) - 1
         self.writer(arcade.get_screens()[current], current)
         self.manager.disable()
         self.window.close()
 
+    #setup of widgets of dialog
     def setup_widgets(self):
         btn_style = {
             "normal": UIFlatButton.UIStyle(
@@ -57,17 +62,21 @@ class Dialog(arcade.View):
                 bg=(172, 0, 63, 255)
             )
         }
-
-
         screens = get_sc()
         self.dropdown = UIDropdown(options=screens, width=200, color=arcade.color.BLACK, default=screens[0])
         self.box_layout.add(self.dropdown)
         self.flat_button = UIFlatButton(text="Выбрать экран", width=200, height=50, style=btn_style)
         self.box_layout.add(self.flat_button)
 
+    #draw all gui elements
     def on_draw(self):
         self.clear()
         self.manager.draw()
 
+    #setup clicks of confirm button
     def setup_clicks(self):
         self.flat_button.on_click = lambda a: self.button_handler()
+
+    #close manager to avoid error
+    def on_close(self):
+        self.manager.disable()

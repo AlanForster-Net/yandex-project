@@ -1,10 +1,13 @@
+#import dependencies
 import json
 import os
 
 
+#path constant
 JSONPATH = 'data/cfg.json'
 
 
+#generate empty file
 def generate():
     try:
         with open(JSONPATH, mode='r', encoding='utf-8') as f:
@@ -18,13 +21,14 @@ def generate():
             f.write("{}")
 
 
+#read from db
 def reader():
     with open(JSONPATH, mode='r', encoding='utf-8') as f:
         data = json.load(f)
     return data
 
 
-
+#write to db
 def writer(screen, num):
     data = dict()
     data["screenNum"] = num
@@ -37,6 +41,7 @@ def writer(screen, num):
         os.fsync(f.fileno())
 
 
+#clean db file
 def cleaner():
     with open(JSONPATH, mode='w', encoding='UTF-8') as f:
         pass
