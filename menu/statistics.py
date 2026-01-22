@@ -15,11 +15,14 @@ class Statistics(arcade.View):
         self.cleaner = cleaner
         self.endgame = endgame
         self.window = window
+        diagonal = (self.window.width ** 2 + self.window.width ** 2) ** 0.5
+        base_diagonal = (2560 ** 2 + 1440 ** 2) ** 0.5
+        self.scale = diagonal / base_diagonal
         self.icon = icon
         self.bd_handler = bd_handler
         self.gamegui = gamegui
         arcade.set_background_color((56, 56, 56))
-        self.box_layout = UIBoxLayout(vertical=True, space_between=10)
+        self.box_layout = UIBoxLayout(vertical=True, space_between=int(10 * self.scale))
         self.setup_widgets()
         self.manager.add(self.anchor_layout)
         self.window.set_caption('Run from antivirus! - Статистика')
@@ -34,20 +37,11 @@ class Statistics(arcade.View):
         vertical_list = UIBoxLayout(size_hint=(1, 0), space_between=1)
         all_stats = self.bd_handler.get_all_stats('name, value')
         for i in range(len(all_stats)):
-            inner_box = UIBoxLayout(vertical=False, space_between=10)
-            stat_name = UILabel(text=all_stats[i][0].strip() + '—',
-                                font_size=45,
+            stat = UILabel(text=all_stats[i][0].strip() + '—' + str(all_stats[i][1]),
+                                font_size=int(40 * self.scale),
                                 text_color=(237, 0, 108),
-                                width=300,
-                                align="left")
-            stat_val = UILabel(text=str(all_stats[i][1]),
-                                font_size=45,
-                                text_color=(237, 0, 108),
-                                width=300,
-                                align="left")
-            inner_box.add(stat_name)
-            inner_box.add(stat_val)
-            vertical_list.add(inner_box)
+                                align="center")
+            vertical_list.add(stat)
         v_scroll_area = UIBoxLayout(vertical=False, size_hint=(0.8, 0.8))
         content_right.add(v_scroll_area, anchor_x="center", anchor_y="center")
         scroll_layout = v_scroll_area.add(UIScrollArea(size_hint=(1, 1)))
@@ -58,28 +52,28 @@ class Statistics(arcade.View):
 
         btn_style = {
             "normal": UIFlatButton.UIStyle(
-                font_size=18,
+                font_size=int(18 * self.scale),
                 bg=(213, 0, 97, 255)
             ),
             "hover": UIFlatButton.UIStyle(
-                font_size=18,
+                font_size=int(18 * self.scale),
                 bg=(192, 0, 87, 255)
             ),
             "press": UIFlatButton.UIStyle(
-                font_size=18,
+                font_size=int(18 * self.scale),
                 bg=(172, 0, 63, 255)
             )
         }
         logo = arcade.texture.load_texture(self.icon)
-        logo = UIImage(texture=logo, width=300, height=300, alpha=255)
+        logo = UIImage(texture=logo, width=int(300 * self.scale), height=int(300 * self.scale), alpha=255)
         self.box_layout.add(logo)
         page_name = UILabel(text="Run from antivirus! - Статистика",
-                            font_size=50,
+                            font_size=int(50 * self.scale),
                             text_color=(237, 0, 108),
-                            width=300,
+                            width=int(300 * self.scale),
                             align="center")
         self.box_layout.add(page_name)
-        to_menu_btn = UIFlatButton(text="Вернуться в меню", width=500, height=50, style=btn_style)
+        to_menu_btn = UIFlatButton(text="Вернуться в меню", width=int(500 * self.scale), height=int(50 * self.scale), style=btn_style)
         to_menu_btn.on_click = lambda a: self.to_menu()
         self.box_layout.add(to_menu_btn)
 

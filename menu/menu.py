@@ -2,6 +2,7 @@ import arcade
 from arcade.gui import UIManager, UIFlatButton, UIImage, UILabel
 from arcade.gui.widgets.layout import UIAnchorLayout, UIBoxLayout
 
+
 class GameGUI(arcade.View):
     def __init__(self, game, cleaner, endgame, window, icon, bd_handler, statistics):
         super().__init__()
@@ -12,12 +13,15 @@ class GameGUI(arcade.View):
         self.bd_handler = bd_handler
         self.icon = icon
         self.statistics = statistics
+        diagonal = (self.window.width ** 2 + self.window.width ** 2) ** 0.5
+        base_diagonal = (2560 ** 2 + 1440 ** 2) ** 0.5
+        self.scale = diagonal / base_diagonal
         self.start_level = bd_handler.get_stats('cur_lvl')
         arcade.set_background_color((56, 56, 56))
         self.manager = UIManager()
         self.manager.enable()
         self.anchor_layout = UIAnchorLayout()
-        self.box_layout = UIBoxLayout(vertical=True, space_between=20)
+        self.box_layout = UIBoxLayout(vertical=True, space_between=int(20 * self.scale))
         self.setup_widgets()
         self.anchor_layout.add(self.box_layout)
         self.manager.add(self.anchor_layout)
@@ -27,33 +31,33 @@ class GameGUI(arcade.View):
     def setup_widgets(self):
         btn_style = {
             "normal": UIFlatButton.UIStyle(
-                font_size=18,
+                font_size=int(18 * self.scale),
                 bg=(213, 0, 97, 255)
             ),
             "hover": UIFlatButton.UIStyle(
-                font_size=18,
+                font_size=int(18 * self.scale),
                 bg=(192, 0, 87, 255)
             ),
             "press": UIFlatButton.UIStyle(
-                font_size=18,
+                font_size=int(18 * self.scale),
                 bg=(172, 0, 63, 255)
             )
         }
         game_name = UILabel(text="Run from antivirus!",
-                        font_size=50,
+                        font_size=int(50 * self.scale),
                         text_color=(237, 0, 108),
-                        width=300,
+                        width=int(300 * self.scale),
                         align="center")
         logo = arcade.texture.load_texture(self.icon)
-        logo = UIImage(texture=logo, width=200, height=200, alpha=255)
-        name_layout = UIBoxLayout(vertical=False, space_between=20)
-        start_game_btn = UIFlatButton(text="Начать игру", width=500, height=50, style=btn_style)
+        logo = UIImage(texture=logo, width=int(200 * self.scale), height=int(200 * self.scale), alpha=255)
+        name_layout = UIBoxLayout(vertical=False, space_between=int(20 * self.scale))
+        start_game_btn = UIFlatButton(text="Начать игру", width=int(500 * self.scale), height=int(50 * self.scale), style=btn_style)
         start_game_btn.on_click = self.start_game
-        stat_btn = UIFlatButton(text="Статистика", width=500, height=50, style=btn_style)
+        stat_btn = UIFlatButton(text="Статистика", width=int(500 * self.scale), height=int(50 * self.scale), style=btn_style)
         stat_btn.on_click = lambda a: self.open_stat_win()
-        exit_with_open = UIFlatButton(text="Выйти из игры (с выбором монитора)", width=500, height=50, style=btn_style)
+        exit_with_open = UIFlatButton(text="Выйти из игры (с выбором монитора)", width=int(500 * self.scale), height=int(50 * self.scale), style=btn_style)
         exit_with_open.on_click = lambda a: self.clear_file_and_close_event()
-        exit_btn = UIFlatButton(text="Выйти из игры", width=500, height=50, style=btn_style)
+        exit_btn = UIFlatButton(text="Выйти из игры", width=int(500 * self.scale), height=int(50 * self.scale), style=btn_style)
         exit_btn.on_click = lambda a: arcade.close_window()
         name_layout.add(logo)
         name_layout.add(game_name)

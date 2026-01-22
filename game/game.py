@@ -4,12 +4,6 @@ from arcade.particles import FadeParticle, Emitter, EmitBurst
 
 from arcade.examples.camera_platform import JUMP_SPEED
 from pyglet.graphics import Batch
-from arcade.experimental.query_demo import SCREEN_HEIGHT, SCREEN_WIDTH
-from handlers.screen_handler import get_screen_data
-
-# Constants
-TITLE = "Run from antivirus! — Level 1"
-SCREEN = arcade.get_screens()[get_screen_data("screenNum")]
 
 # Player const
 PLAYER_SPEED = 1.5
@@ -23,7 +17,7 @@ STAMINA_REFRESH_SPEED = 0.5
 STAMINA_USING_VALUE = 1.0
 
 # Enemy const
-ENEMY_SPEED = 1
+ENEMY_SPEED = 0.75
 # Physic const
 GRAVITY = 0.8
 MAX_LEVEL = 5
@@ -34,6 +28,12 @@ BLOOD_TEX = [
     arcade.make_soft_circle_texture(20, arcade.color.DARK_RED),
     arcade.make_soft_circle_texture(15, arcade.color.DARK_CANDY_APPLE_RED),
     arcade.make_soft_circle_texture(16, arcade.color.BURGUNDY),
+]
+
+GREEN_TEX = [
+    arcade.make_soft_circle_texture(20, arcade.color.GREEN),
+    arcade.make_soft_circle_texture(15, arcade.color.ANDROID_GREEN),
+    arcade.make_soft_circle_texture(16, arcade.color.APPLE_GREEN),
 ]
 
 
@@ -48,12 +48,12 @@ def blood_spray_mutator(p):
 
 
 # fabric of blood
-def make_blood_spray(x, y, count=500):
+def make_blood_spray(x, y, count=500, color=BLOOD_TEX):
     return Emitter(
         center_xy=(x, y),
         emit_controller=EmitBurst(count),
         particle_factory=lambda e: FadeParticle(
-            filename_or_texture=random.choice(BLOOD_TEX),
+            filename_or_texture=random.choice(color),
             change_xy=(
                 random.uniform(-5.0, 5.0),
                 random.uniform(2.5, 7.0),
@@ -249,11 +249,7 @@ class Game(arcade.View):
         self.s_pressed = False
         # timer of game
         self.timer_running = 0
-        # music player
-        self.main_theme = arcade.load_sound("resources/sound/soundtrack.mp3")
-        self.music_player = None
         self.window.set_caption(title)
-        self.music_player = self.main_theme.play(volume=0.3, loop=True)
 
     # function for changing levels
     def init_scene(self, tilemap):
@@ -304,15 +300,17 @@ class Game(arcade.View):
                                                      ladders=self.ladders,
                                                      gravity_constant=GRAVITY)
         arcade.schedule(self.update_timer, 1.0)
+        self.main_theme = arcade.load_sound("resources/sound/soundtrack.mp3")
+        self.music_player = self.main_theme.play(volume=0.3, loop=True)
 
     def gui_draw(self):
         # Stamina bar
-        scale = self.width / SCREEN_WIDTH * 0.7  # scale for different monitors
-        left_shift = 50 * scale  # shift with scale
+        scale = 0.000546875 * self.window.width # scale for different monitors
+        left_shift = int(50 * scale)  # shift with scale
         panel_width = int(305 * scale)  # size of stamina bar
         panel_height = int(50 * scale)
         # stamina's bar positon
-        panel_x = int(self.width - (275 * scale) - left_shift)
+        panel_x = int(self.window.width - (275 * scale) - left_shift)
         panel_y = int(25 * scale)
         # drawing everything
         arcade.draw_lbwh_rectangle_filled(
@@ -351,8 +349,8 @@ class Game(arcade.View):
             )
         # timer
         self.batch = Batch()
-        base_x = self.width
-        base_y = self.height
+        base_x = self.window.width
+        base_y = self.window.height
         desired_offset = 20
         text_x = int(base_x + (desired_offset * scale) - left_shift)
         text_y = int(base_y - (desired_offset * scale))
@@ -371,8 +369,8 @@ class Game(arcade.View):
         #score bar
         bug_font_size = int(15 * scale)
         bug_counter_text = f"Bugs: {self.bug_count}"
-        bug_text_x = int(self.width / 2)
-        bug_text_y = int(self.height - (20 * scale))
+        bug_text_x = int(self.window.width / 2)
+        bug_text_y = int(self.window.height - (20 * scale))
 
         bug_text = arcade.Text(
             bug_counter_text,
@@ -449,19 +447,19 @@ class Game(arcade.View):
 
         # dash
         if self.dash_button and self.right_pressed and self.player.stamina >= 1:
-            self.bd_handler.add_stats(searching='dash')
             self.player.stamina -= self.player.stamina_using_value
             self.player.change_x = 0
             self.player.center_x += DASH_GAP
+            self.bd_handler.add_stats(searching='dash')
             self.dash_button = False
         elif self.dash_button and self.left_pressed and self.player.stamina >= 1:
-            self.bd_handler.add_stats(searching='dash')
             self.player.stamina -= self.player.stamina_using_value
             self.player.change_x = 0
             self.player.center_x -= DASH_GAP
+            self.bd_handler.add_stats(searching='dash')
             self.dash_button = False
 
-        self.pp_eng.update()
+
 
         # update camera's position
         pos = (self.player.center_x, self.player.center_y)
@@ -494,7 +492,7 @@ class Game(arcade.View):
         # Count collected bugs
         for bug in c_bugs:
             bug.remove_from_sprite_lists()
-            self.emitters.append(make_blood_spray(bug.center_x, bug.center_y))
+            self.emitters.append(make_blood_spray(bug.center_x, bug.center_y, color=GREEN_TEX))
             self.bug_count += 1
 
         for bug in c_bug_2:
@@ -509,6 +507,7 @@ class Game(arcade.View):
         # reach the end
         if len(arcade.check_for_collision_with_list(self.player, self.end)) != 0:
             self.win_game()
+        self.pp_eng.update()
 
     # timer of running
     def update_timer(self, delta_time):
@@ -524,6 +523,7 @@ class Game(arcade.View):
             arcade.stop_sound(self.music_player)
             view = self.gamegui(Game, self.cleaner, self.endgame, self.window, self.icon, self.bd_handler,
                                 self.statistics)
+            self.window.show_view(view)
         if key == arcade.key.D:
             self.right_pressed = True
         if key == arcade.key.A:
@@ -567,5 +567,5 @@ class Game(arcade.View):
     def win_game(self):
         arcade.stop_sound(self.music_player)
         view = self.endgame(self.level, self.gamegui, Game, self.cleaner, self.window, MAX_LEVEL, self.icon, False,
-                            self.bd_handler, self.statistics)
+                            self.bd_handler, self.statistics, self.bug_count)
         self.window.show_view(view)
