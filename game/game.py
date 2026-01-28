@@ -301,7 +301,7 @@ class Game(arcade.View):
                                                      gravity_constant=GRAVITY)
         arcade.schedule(self.update_timer, 1.0)
         self.main_theme = arcade.load_sound("resources/sound/soundtrack.mp3")
-        self.music_player = self.main_theme.play(volume=0.3, loop=True)
+        self.music_player = self.main_theme.play(volume=100, loop=True)
 
     def gui_draw(self):
         # Stamina bar
@@ -567,5 +567,5 @@ class Game(arcade.View):
     def win_game(self):
         arcade.stop_sound(self.music_player)
         view = self.endgame(self.level, self.gamegui, Game, self.cleaner, self.window, MAX_LEVEL, self.icon, False,
-                            self.bd_handler, self.statistics, self.timer_running, self.bug_count)
+                            self.bd_handler, self.timer_running, self.statistics, bug_cnt=self.bug_count)
         self.window.show_view(view)

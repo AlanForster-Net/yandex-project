@@ -6,8 +6,8 @@ from arcade.gui.widgets.layout import UIAnchorLayout, UIBoxLayout
 
 #end game class
 class EndGame(arcade.View):
-    def __init__(self, level_num, gamegui, game, cleaner, window, max_level, icon, failed, bd_handler, statistics,
-                 timer, bug_cnt=0):
+    def __init__(self, level_num, gamegui, game, cleaner, window, max_level, icon, failed, bd_handler, timer,
+                 statistics, bug_cnt=0):
         super().__init__()
         arcade.set_background_color((56, 56, 56))
         self.game = game
